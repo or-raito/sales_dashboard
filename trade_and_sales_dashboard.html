@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="he" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade & Sales Dashboard</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #1a1d2e;
+  --card2: #1e2235;
+  --border: #2a2d3e;
+  --text: #e8eaf0;
+  --text2: #9096a8;
+  --accent: #3b82f6;
+  --green: #10b981;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --header-h: #161929;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+}
+
+/* Header */
+.hdr {
+  background: var(--header-h);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.hdr-left h1 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hdr-left .sub {
+  color: var(--text2);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.hdr-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-grey {
+  background: #2a2d3e;
+  color: var(--text2);
+}
+
+.badge-green {
+  background: #064e3b;
+  color: #34d399;
+  border: 1px solid #059669;
+}
+
+.badge-amber {
+  background: #78350f;
+  color: #fcd34d;
+  border: 1px solid #d97706;
+}
+
+/* Filter Bar */
+.fbar {
+  padding: 16px 24px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.fbar label {
+  font-weight: 600;
+  color: var(--text2);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.fbar select, .fbar button {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  background: var(--card2);
+  color: var(--text);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.fbar select:hover, .fbar button:hover {
+  background: #2a2d3e;
+}
+
+.brand-btn {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+
+.brand-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.reset-btn {
+  margin-left: auto;
+  background: #7f1d1d;
+  border-color: #991b1b;
+  color: #fca5a5;
+}
+
+.reset-btn:hover {
+  background: #991b1b;
+}
+
+/* Banner */
+.banner {
+  padding: 12px 24px;
+  background: #064e3b;
+  color: #34d399;
+  border-bottom: 1px solid #059669;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.banner .chk {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* KPIs */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--bg);
+}
+
+.kpi {
+  background: var(--card);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.kpi .label {
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.kpi .val {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.kpi .val.green { color: var(--green); }
+.kpi .val.red { color: var(--red); }
+
+.kpi .sub {
+  color: var(--text2);
+  font-size: 11px;
+}
+
+.pos { color: var(--green); }
+.neg { color: var(--red); }
+
+/* Charts */
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 0 24px 16px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 0 24px 16px;
+}
+
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.chart-card.full {
+  grid-column: 1 / -1;
+}
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.chart-sub {
+  color: var(--text2);
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+
+canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.legend-sq {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* Table */
+.tbl-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th {
+  background: var(--card2);
+  padding: 10px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+
+th:hover {
+  background: #2a2d3e;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:hover {
+  background: var(--card2);
+}
+
+.rag-g {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.rag-a {
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.rag-r {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.mom-pos {
+  color: var(--green);
+}
+
+.mom-neg {
+  color: var(--red);
+}
+
+.ts {
+  text-align: center;
+  padding: 16px;
+  color: var(--text2);
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-left">
+    <h1>Trade &amp; Sales Dashboard</h1>
+    <div class="sub">Customer-Centric &middot; Dec '25 – Feb '26</div>
+  </div>
+  <div class="hdr-badges">
+    <span class="badge badge-grey">ISR</span>
+    <span class="badge badge-grey">Ice Cream / Frozen</span>
+    <span class="badge badge-green">&#9679; Sales Data Loaded</span>
+    <span class="badge badge-amber">Feb = MTD</span>
+  </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="fbar">
+  <label>Customer</label>
+  <select id="sel-customer" onchange="applyFilters()">
+    <option value="__all__">All Customers</option>
+  </select>
+
+  <label>Distributor</label>
+  <select id="sel-dist" onchange="applyFilters()">
+    <option value="__all__">All Distributors</option>
+    <option value="icedream">אייסקרים (Icedream)</option>
+    <option value="mayyan">מעיין (Ma'ayan)</option>
+  </select>
+
+  <label>Status</label>
+  <select id="sel-status" onchange="applyFilters()">
+    <option value="__all__">All</option>
+    <option value="active">Active (MoM &gt; 0%)</option>
+    <option value="growing">Growing (&gt; 10%)</option>
+    <option value="declining">Declining (&lt; 0%)</option>
+  </select>
+
+  <label>Month</label>
+  <select id="sel-month" onchange="applyFilters()">
+    <option value="__all__">All Months</option>
+    <option value="Dec '25">December '25</option>
+    <option value="Jan '26">January '26</option>
+    <option value="Feb '26">February '26</option>
+  </select>
+
+  <label>Brand</label>
+  <button class="brand-btn active" id="btn-ab" onclick="setBrand('ab')">All Brands</button>
+  <button class="brand-btn" id="btn-turbo" onclick="setBrand('turbo')">Turbo</button>
+  <button class="brand-btn" id="btn-danis" onclick="setBrand('danis')">Dani's</button>
+
+  <button class="reset-btn" onclick="resetFilters()">Reset</button>
+</div>
+
+<!-- Info Banner -->
+<div class="banner">
+  <span class="chk">✓</span>
+  <span id="banner-text">Sales data loaded — Dec '25, Jan '26, Feb '26 (MTD) · <b>42</b> customers · 2 distributors</span>
+</div>
+
+<!-- KPI Cards -->
+<div class="kpis">
+  <div class="kpi">
+    <div class="label">Revenue (Jan)</div>
+    <div class="val" id="kpi-rev">₪0</div>
+    <div class="sub" id="kpi-rev-sub"><span class="pos">+0.0% vs prev</span></div>
+  </div>
+
+  <div class="kpi">
+    <div class="label">Units (Jan)</div>
+    <div class="val" id="kpi-units">0</div>
+    <div class="sub" id="kpi-units-sub">0 customers w/ sales</div>
+  </div>
+
+  <div class="kpi">
+    <div class="label">Gross Profit ₪</div>
+    <div class="val green" id="kpi-gp">₪0</div>
+    <div class="sub" id="kpi-gp-sub">Avg Gross: 0%</div>
+  </div>
+
+  <div class="kpi">
+    <div class="label">OP Profit ₪</div>
+    <div class="val green" id="kpi-op">₪0</div>
+    <div class="sub">After dist. costs</div>
+  </div>
+
+  <div class="kpi">
+    <div class="label">Customers w/ Sales</div>
+    <div class="val" id="kpi-cust">0</div>
+    <div class="sub" id="kpi-cust-sub">of 0 in filter</div>
+  </div>
+
+  <div class="kpi">
+    <div class="label">Portfolio Dec→Jan</div>
+    <div class="val" id="kpi-mom">+0.0%</div>
+    <div class="sub">MoM change</div>
+  </div>
+</div>
+
+<!-- Charts: Row 1 (Pareto + Quadrant) -->
+<div style="display:grid;grid-template-columns:3fr 2fr;gap:16px;padding:0 24px 16px">
+  <div class="chart-card">
+    <div class="chart-title">Customer Revenue Ranking — Pareto</div>
+    <div class="chart-sub">Top 15 customers by revenue. GM% RAG: Green ≥45%, Amber 40-44%, Red &lt;40%</div>
+    <canvas id="paretoChart" height="280"></canvas>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-sq" style="background: #10b981;"></div> Healthy (GM% ≥ 45%)</div>
+      <div class="legend-item"><div class="legend-sq" style="background: #f59e0b;"></div> Caution (40-44%)</div>
+      <div class="legend-item"><div class="legend-sq" style="background: #ef4444;"></div> At Risk (GM% &lt; 40%)</div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Growth Quadrant</div>
+    <div class="chart-sub">Revenue vs MoM%</div>
+    <canvas id="quadrantChart" height="280"></canvas>
+  </div>
+</div>
+
+<!-- Charts: Row 2 (Product Mix + Trend) -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 24px 16px">
+  <div class="chart-card">
+    <div class="chart-title">Product Mix</div>
+    <div class="chart-sub">Top 12 customers by units</div>
+    <canvas id="mixChart" height="280"></canvas>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Portfolio Trend</div>
+    <div class="chart-sub">3-month revenue evolution</div>
+    <canvas id="trendChart" height="280"></canvas>
+  </div>
+</div>
+
+<!-- Table Section -->
+<div style="padding: 0 24px 24px;">
+  <div class="chart-card full">
+    <div class="chart-title">Customer Performance Table</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('name')">Customer</th>
+            <th onclick="sortTable('dist')">Distributor</th>
+            <th onclick="sortTable('revenue')">Revenue ₪</th>
+            <th onclick="sortTable('gm_pct')">GM%</th>
+            <th onclick="sortTable('op_profit')">OP Profit ₪</th>
+            <th onclick="sortTable('units')">Units</th>
+            <th onclick="sortTable('mom')">MoM%</th>
+          </tr>
+        </thead>
+        <tbody id="custTbody">
+          <tr><td class="ts" colspan="7">Loading data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Global State ──────────────────────────────────────────────────────────
+const RAW = {"customers": [{"dist": "icedream", "name": "וולט", "revenue": 1879073, "gross_profit": 722506, "op_profit": 440645, "gm_pct": 38.5, "units": 50250, "mom": 34.1, "products": {"dream_cake": 17546, "vanilla": 7476, "mango": 4225, "chocolate": 7989, "magadat": 7074, "pistachio": 5940}, "months": {"Dec '25": {"revenue": 644423, "units": 18951}, "Jan '26": {"revenue": 527462, "units": 11594}, "Feb '26": {"revenue": 707187, "units": 19705}}}, {"dist": "mayyan", "name": "שוק פרטי", "revenue": 632771, "gross_profit": 334727, "op_profit": 258794, "gm_pct": 52.9, "units": 45853, "mom": -48.6, "products": {"chocolate": 18180, "mango": 11116, "vanilla": 16557}, "months": {"Dec '25": {"revenue": 418002, "units": 30290}, "Jan '26": {"revenue": 214769, "units": 15563}}}, {"dist": "mayyan", "name": "דור אלון", "revenue": 363257, "gross_profit": 192158, "op_profit": 148567, "gm_pct": 52.9, "units": 26323, "mom": -74.0, "products": {"chocolate": 10300, "mango": 6613, "vanilla": 9410}, "months": {"Dec '25": {"revenue": 288337, "units": 20894}, "Jan '26": {"revenue": 74920, "units": 5429}}}, {"dist": "mayyan", "name": "שוק פרטי ", "revenue": 225078, "gross_profit": 116735, "op_profit": 89726, "gm_pct": 51.9, "units": 16310, "mom": 0, "products": {"chocolate": 4580, "mango": 3070, "pistachio": 3880, "vanilla": 4780}, "months": {"Feb '26": {"revenue": 225078, "units": 16310}}}, {"dist": "mayyan", "name": "דור אלון ", "revenue": 144610, "gross_profit": 74235, "op_profit": 56881, "gm_pct": 51.3, "units": 10479, "mom": 0, "products": {"chocolate": 2639, "mango": 1350, "pistachio": 3770, "vanilla": 2720}, "months": {"Feb '26": {"revenue": 144610, "units": 10479}}}, {"dist": "mayyan", "name": "פז ילו", "revenue": 118790, "gross_profit": 62838, "op_profit": 48584, "gm_pct": 52.9, "units": 8608, "mom": 117.4, "products": {"chocolate": 3430, "mango": 2172, "vanilla": 3006}, "months": {"Dec '25": {"revenue": 37426, "units": 2712}, "Jan '26": {"revenue": 81365, "units": 5896}}}, {"dist": "icedream", "name": "ינגו דלי ישראל בע\"מ", "revenue": 106838, "gross_profit": 42734, "op_profit": 26708, "gm_pct": 40.0, "units": 2843, "mom": 42.2, "products": {"dream_cake": 487, "vanilla": 906, "mango": 598, "chocolate": 807, "magadat": 45}, "months": {"Dec '25": {"revenue": 25173, "units": 348}, "Jan '26": {"revenue": 33718, "units": 708}, "Feb '26": {"revenue": 47947, "units": 1787}}}, {"dist": "mayyan", "name": "פז חברת נפט- סופר יודה", "revenue": 105087, "gross_profit": 55590, "op_profit": 42979, "gm_pct": 52.9, "units": 7615, "mom": -11.2, "products": {"chocolate": 3044, "mango": 1832, "vanilla": 2739}, "months": {"Dec '25": {"revenue": 67234, "units": 4872}, "Jan '26": {"revenue": 20051, "units": 1453}, "Feb '26": {"revenue": 17802, "units": 1290}}}, {"dist": "icedream", "name": "חוות נעמי", "revenue": 76113, "gross_profit": 28740, "op_profit": 17323, "gm_pct": 37.8, "units": 1890, "mom": 198.9, "products": {"dream_cake": 732, "vanilla": 438, "mango": 270, "chocolate": 350, "pistachio": 100}, "months": {"Dec '25": {"revenue": 7186, "units": 465}, "Jan '26": {"revenue": 17277, "units": 484}, "Feb '26": {"revenue": 51649, "units": 941}}}, {"dist": "icedream", "name": "דומינוס", "revenue": 68092, "gross_profit": 36020, "op_profit": 25806, "gm_pct": 52.9, "units": 6056, "mom": -92.6, "products": {"vanilla": 2022, "mango": 1904, "chocolate": 2130}, "months": {"Jan '26": {"revenue": 63418, "units": 5646}, "Feb '26": {"revenue": 4675, "units": 410}}}, {"dist": "mayyan", "name": "דלק מנטה", "revenue": 62307, "gross_profit": 32960, "op_profit": 25483, "gm_pct": 52.9, "units": 4515, "mom": -55.4, "products": {"chocolate": 1725, "mango": 1195, "vanilla": 1595}, "months": {"Dec '25": {"revenue": 31892, "units": 2311}, "Jan '26": {"revenue": 21031, "units": 1524}, "Feb '26": {"revenue": 9384, "units": 680}}}, {"dist": "mayyan", "name": "פז יילו ", "revenue": 59685, "gross_profit": 31572, "op_profit": 24410, "gm_pct": 52.9, "units": 4325, "mom": 0, "products": {"chocolate": 1538, "mango": 1147, "vanilla": 1640}, "months": {"Feb '26": {"revenue": 59685, "units": 4325}}}, {"dist": "icedream", "name": "כרמלה", "revenue": 28802, "gross_profit": 13954, "op_profit": 9634, "gm_pct": 48.5, "units": 1737, "mom": -70.1, "products": {"vanilla": 390, "mango": 240, "chocolate": 390, "magadat": 612, "dream_cake": 75, "pistachio": 30}, "months": {"Dec '25": {"revenue": 17185, "units": 1272}, "Jan '26": {"revenue": 8941, "units": 360}, "Feb '26": {"revenue": 2676, "units": 105}}}, {"dist": "icedream", "name": "נוי השדה", "revenue": 28529, "gross_profit": 15091, "op_profit": 10812, "gm_pct": 52.9, "units": 2132, "mom": -89.5, "products": {"vanilla": 738, "mango": 594, "chocolate": 752, "magadat": 48}, "months": {"Dec '25": {"revenue": 13409, "units": 978}, "Jan '26": {"revenue": 13679, "units": 1044}, "Feb '26": {"revenue": 1441, "units": 110}}}, {"dist": "icedream", "name": "עוגיפלצת", "revenue": 20983, "gross_profit": 11006, "op_profit": 7858, "gm_pct": 52.4, "units": 1654, "mom": 0, "products": {"vanilla": 522, "mango": 332, "chocolate": 660, "pistachio": 140}, "months": {"Feb '26": {"revenue": 20983, "units": 1654}}}, {"dist": "icedream", "name": "גוד פארם", "revenue": 20564, "gross_profit": 10861, "op_profit": 7776, "gm_pct": 52.8, "units": 1584, "mom": -59.3, "products": {"vanilla": 600, "mango": 364, "chocolate": 590, "pistachio": 30}, "months": {"Jan '26": {"revenue": 14620, "units": 1128}, "Feb '26": {"revenue": 5944, "units": 456}}}, {"dist": "mayyan", "name": "סונול", "revenue": 15842, "gross_profit": 8380, "op_profit": 6479, "gm_pct": 52.9, "units": 1148, "mom": -26.1, "products": {"chocolate": 430, "mango": 272, "vanilla": 446}, "months": {"Dec '25": {"revenue": 9108, "units": 660}, "Jan '26": {"revenue": 6734, "units": 488}}}, {"dist": "mayyan", "name": "סונול ", "revenue": 5216, "gross_profit": 2759, "op_profit": 2133, "gm_pct": 52.9, "units": 378, "mom": 0, "products": {"chocolate": 140, "mango": 88, "vanilla": 150}, "months": {"Feb '26": {"revenue": 5216, "units": 378}}}], "portfolioTrend": [{"month": "Dec '25", "revenue": 1559374, "units": 83753}, {"month": "Jan '26", "revenue": 1768165, "units": 71921}, {"month": "Feb '26", "revenue": 1304278, "units": 58630}], "productColors": {"chocolate": "#8B4513", "vanilla": "#F5DEB3", "mango": "#FF8C00", "magadat": "#999999", "dream_cake": "#4A0E0E", "pistachio": "#93C572"}, "productShort": {"chocolate": "Chocolate", "vanilla": "Vanilla", "mango": "Mango", "magadat": "Magadat", "dream_cake": "Dream Cake", "pistachio": "Pistachio"}, "productHeb": {"chocolate": "שוקולד", "vanilla": "וניל", "mango": "מנגו", "pistachio": "פיסטוק", "dream_cake": "עוגת חלום", "magadat": "מארז"}};
+
+let DIST_FILTER = '__all__';
+let CUST_FILTER = '__all__';
+let MONTH_FILTER = '__all__';
+let STATUS_FILTER = '__all__';
+let BRAND_FILTER = 'ab';
+let SORT_KEY = 'revenue';
+let SORT_DIR = -1;
+let TREND_MODE = 'revenue';
+
+const TURBO_PRODS = ['chocolate', 'vanilla', 'mango', 'pistachio', 'magadat'];
+const DANIS_PRODS = ['dream_cake'];
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function fmt(n) { return (n || 0).toLocaleString(); }
+function fmtN(n) { return Math.round(n).toLocaleString(); }
+
+function ragColor(gmPct) {
+  if (gmPct >= 45) return '#10b981';
+  if (gmPct >= 40) return '#f59e0b';
+  return '#ef4444';
+}
+
+function rag(gmPct) {
+  if (gmPct >= 45) return 'rag-g';
+  if (gmPct >= 40) return 'rag-a';
+  return 'rag-r';
+}
+
+function fmtAxis(n) {
+  if (n >= 1000000) return '₪' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return '₪' + Math.round(n/1000) + 'K';
+  return '₪' + Math.round(n);
+}
+
+function canvasText(ctx, text, x, y, opts={}) {
+  ctx.fillStyle = opts.color || '#9096a8';
+  ctx.font = `${opts.bold?'bold ':''}${opts.fontSize||11}px Segoe UI, sans-serif`;
+  ctx.textAlign = opts.align || 'left';
+  ctx.textBaseline = opts.baseline || 'top';
+  ctx.fillText(text, x, y);
+}
+
+// ── Canvas Drawing Helpers ────────────────────────────────────────────────
+function drawChart(canvasId, drawFn) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const parent = canvas.parentElement;
+  const w = parent.offsetWidth - 32;
+  const h = canvas.height || 280;
+  canvas.width = w;
+  canvas.height = h;
+  
+  ctx.fillStyle = '#1a1d2e';
+  ctx.fillRect(0, 0, w, h);
+  
+  drawFn(ctx, w, h);
+}
+
+// ── Chart Drawing Functions ──────────────────────────────────────────────
+
+function drawPareto(filtered) {
+  drawChart('paretoChart', (ctx, w, h) => {
+    if (!filtered.length) return;
+
+    const top = [...filtered].sort((a,b) => b.revenue - a.revenue).slice(0, 15);
+    const padL = 52, padR = 48, padT = 16, padB = 54;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+    const barW = Math.max(18, Math.floor(plotW / top.length) - 3);
+    const gap  = Math.max(2, Math.floor(plotW / top.length) - barW);
+    const maxVal = Math.max(...top.map(c => c.revenue));
+    const totalRev = top.reduce((s, c) => s + c.revenue, 0);
+
+    // Grid lines
+    ctx.strokeStyle = '#1e2235';
+    ctx.lineWidth = 1;
+    for (let i = 1; i <= 4; i++) {
+      const y = padT + plotH * (1 - i/4);
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + plotW, y); ctx.stroke();
+    }
+
+    // Y-axis labels (revenue)
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#9096a8';
+    ctx.font = '10px Segoe UI,sans-serif';
+    for (let i = 0; i <= 4; i++) {
+      const val = maxVal * i / 4;
+      const y = padT + plotH * (1 - i/4);
+      ctx.fillText(fmtAxis(val), padL - 4, y + 3);
+    }
+
+    // Right Y-axis labels (cumulative %)
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '10px Segoe UI,sans-serif';
+    for (let pct of [25,50,75,100]) {
+      const y = padT + plotH * (1 - pct/100);
+      ctx.fillText(pct + '%', padL + plotW + 4, y + 3);
+    }
+
+    // Axes
+    ctx.strokeStyle = '#2a2d3e';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + plotH + 1); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH); ctx.stroke();
+
+    // Bars
+    top.forEach((c, i) => {
+      const barH = (c.revenue / maxVal) * plotH;
+      const x = padL + i * (barW + gap);
+      const y = padT + plotH - barH;
+
+      // Bar fill
+      ctx.fillStyle = ragColor(c.gm_pct);
+      ctx.fillRect(x, y, barW, barH);
+
+      // Revenue label on top of bar (if bar tall enough)
+      if (barH > 20) {
+        ctx.fillStyle = '#e8eaf0';
+        ctx.font = 'bold 9px Segoe UI,sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(fmtAxis(c.revenue), x + barW/2, y + 4);
+      }
+
+      // Customer name label (rotated)
+      ctx.save();
+      ctx.translate(x + barW/2, padT + plotH + 6);
+      ctx.rotate(Math.PI / 3.5);
+      ctx.fillStyle = '#9096a8';
+      ctx.font = '9px Segoe UI,sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(c.name.substring(0, 10), 0, 0);
+      ctx.restore();
+    });
+
+    // Cumulative Pareto line (80/20)
+    let cumRev = 0;
+    const linePoints = [];
+    top.forEach((c, i) => {
+      cumRev += c.revenue;
+      const pct = cumRev / totalRev;
+      const cx = padL + i * (barW + gap) + barW / 2;
+      const cy = padT + plotH * (1 - pct);
+      linePoints.push([cx, cy, pct]);
+    });
+
+    // Draw cumulative line
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    linePoints.forEach(([cx, cy], i) => { if (i===0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy); });
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw 80% reference line
+    const y80 = padT + plotH * 0.20;
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(padL, y80); ctx.lineTo(padL + plotW, y80); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#f59e0b';
+    ctx.font = '9px Segoe UI,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('80%', padL + plotW - 2, y80 - 3);
+
+    // Dots on cumulative line
+    linePoints.forEach(([cx, cy, pct]) => {
+      ctx.fillStyle = pct <= 0.8 ? '#60a5fa' : '#94a3b8';
+      ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI*2); ctx.fill();
+    });
+  });
+}
+
+function drawQuadrant(filtered) {
+  drawChart('quadrantChart', (ctx, w, h) => {
+    if (!filtered.length) return;
+
+    const padL = 44, padR = 12, padT = 16, padB = 28;
+    const plotW = w - padL - padR;
+    const plotH = h - padT - padB;
+    const plotL = padL;
+    const plotT = padT;
+
+    const maxRev = Math.max(...filtered.map(c => c.revenue));
+    const medRev  = filtered.map(c => c.revenue).sort((a,b) => a-b)[Math.floor(filtered.length/2)];
+    const allMom  = filtered.map(c => c.mom);
+    const minMom  = Math.min(...allMom, -30);
+    const maxMom  = Math.max(...allMom, 30);
+
+    // Quadrant divider positions
+    const xLine = plotL + (medRev / maxRev) * plotW;
+    const yZero = maxMom === minMom ? plotT + plotH/2 : plotT + plotH * (1 - (0 - minMom)/(maxMom - minMom));
+
+    // Quadrant background fills
+    const quadrants = [
+      { x: xLine,  y: plotT,   w: plotL+plotW-xLine, h: yZero-plotT,       fill: 'rgba(251,191,36,0.05)',  label: '⭐ Stars',     lx: xLine+6,  ly: plotT+14,  color: '#fbbf24' },
+      { x: plotL,  y: plotT,   w: xLine-plotL,       h: yZero-plotT,       fill: 'rgba(96,165,250,0.05)',  label: '🚀 Emerging',  lx: plotL+6,  ly: plotT+14,  color: '#60a5fa' },
+      { x: xLine,  y: yZero,   w: plotL+plotW-xLine, h: plotT+plotH-yZero, fill: 'rgba(239,68,68,0.05)',   label: '⚠ At-Risk',   lx: xLine+6,  ly: yZero+14,  color: '#ef4444' },
+      { x: plotL,  y: yZero,   w: xLine-plotL,       h: plotT+plotH-yZero, fill: 'rgba(107,114,128,0.05)', label: '🔴 Declining', lx: plotL+6,  ly: yZero+14,  color: '#9ca3af' },
+    ];
+    quadrants.forEach(q => {
+      ctx.fillStyle = q.fill;
+      ctx.fillRect(q.x, q.y, q.w, q.h);
+      ctx.fillStyle = q.color;
+      ctx.font = '9px Segoe UI,sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(q.label, q.lx, q.ly);
+    });
+
+    // Divider lines
+    ctx.strokeStyle = '#374151';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(xLine, plotT); ctx.lineTo(xLine, plotT+plotH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(plotL, yZero); ctx.lineTo(plotL+plotW, yZero); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Axes
+    ctx.strokeStyle = '#2a2d3e';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(plotL, plotT); ctx.lineTo(plotL, plotT+plotH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(plotL, plotT+plotH); ctx.lineTo(plotL+plotW, plotT+plotH); ctx.stroke();
+
+    // Y-axis labels
+    ctx.fillStyle = '#9096a8';
+    ctx.font = '9px Segoe UI,sans-serif';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 4; i++) {
+      const val = minMom + (maxMom - minMom) * i / 4;
+      const y = plotT + plotH * (1 - i/4);
+      ctx.fillText((val > 0 ? '+' : '') + val.toFixed(0) + '%', plotL - 3, y + 3);
+    }
+
+    // X-axis label
+    ctx.fillStyle = '#9096a8';
+    ctx.font = '10px Segoe UI,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Revenue →', plotL + plotW/2, plotT + plotH + 18);
+
+    // Bubbles
+    const maxR = 18;
+    const maxU  = Math.max(...filtered.map(c => c.units || 1));
+    filtered.forEach(c => {
+      const cx = plotL + (c.revenue / maxRev) * plotW;
+      const cy = maxMom === minMom ? plotT + plotH/2 : plotT + plotH * (1 - (c.mom - minMom)/(maxMom - minMom));
+      const r  = Math.max(4, maxR * Math.sqrt(c.units / maxU));
+
+      let bubbleColor = '#9ca3af';
+      if (c.revenue >= medRev && c.mom >= 0) bubbleColor = '#fbbf24';
+      else if (c.revenue >= medRev && c.mom < 0) bubbleColor = '#ef4444';
+      else if (c.revenue < medRev && c.mom >= 0) bubbleColor = '#60a5fa';
+
+      ctx.globalAlpha = 0.75;
+      ctx.fillStyle = bubbleColor;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = '#1a1d2e';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+
+      // Name label (for larger bubbles)
+      if (r >= 6) {
+        ctx.fillStyle = '#e8eaf0';
+        ctx.font = 'bold 8px Segoe UI,sans-serif';
+        ctx.textAlign = 'center';
+        const label = c.name.substring(0, 5);
+        ctx.fillText(label, cx, cy + 3);
+      }
+    });
+  });
+}
+
+function drawMix(filtered) {
+  drawChart('mixChart', (ctx, w, h) => {
+    if (!filtered.length) return;
+
+    const top = [...filtered].sort((a,b) => b.units - a.units).slice(0, 12);
+    const legendH = 22;
+    const padT = 12, padB = legendH + 10;
+    const barAreaH = h - padT - padB;
+    const barH = Math.max(14, Math.floor(barAreaH / top.length) - 3);
+    const gap = Math.max(2, Math.floor(barAreaH / top.length) - barH);
+    const labelW = 100;
+    const plotL = labelW + 4;
+    const plotW = w - plotL - 12;
+
+    const productOrder = ['chocolate', 'vanilla', 'mango', 'pistachio', 'dream_cake', 'magadat'];
+
+    // Background axis line
+    ctx.strokeStyle = '#2a2d3e';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(plotL, padT); ctx.lineTo(plotL, padT + barAreaH); ctx.stroke();
+
+    // Bars with product stacking (products is a dict {prod: units})
+    top.forEach((c, i) => {
+      const y = padT + i * (barH + gap);
+      let x = plotL;
+      const prods = c.products || {};
+      const totalUnits = c.units || 1;
+
+      productOrder.forEach(prod => {
+        const units = prods[prod] || 0;
+        if (!units) return;
+        const segW = (units / totalUnits) * plotW;
+        const color = RAW.productColors[prod] || '#6b7280';
+
+        ctx.fillStyle = color;
+        // Rounded end on last segment
+        ctx.fillRect(x, y, segW, barH);
+        x += segW;
+      });
+
+      // Unit count at end of bar
+      ctx.fillStyle = '#6b7280';
+      ctx.font = '9px Segoe UI,sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(c.units.toLocaleString(), x + 3, y + barH/2 + 3);
+
+      // Customer label (right-aligned in label column)
+      ctx.fillStyle = '#9096a8';
+      ctx.font = '9px Segoe UI,sans-serif';
+      ctx.textAlign = 'right';
+      const label = c.name.length > 12 ? c.name.substring(0, 11) + '…' : c.name;
+      ctx.fillText(label, plotL - 6, y + barH/2 + 3);
+    });
+
+    // Legend row
+    const legendY = h - legendH + 4;
+    let lx = plotL;
+    productOrder.forEach(prod => {
+      const color = RAW.productColors[prod] || '#6b7280';
+      const label = RAW.productHeb[prod] || prod;
+      ctx.fillStyle = color;
+      ctx.fillRect(lx, legendY, 8, 8);
+      ctx.fillStyle = '#9096a8';
+      ctx.font = '9px Segoe UI,sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, lx + 11, legendY + 7);
+      lx += ctx.measureText(label).width + 22;
+    });
+  });
+}
+
+function drawTrend(filtered) {
+  drawChart('trendChart', (ctx, w, h) => {
+    const trend = RAW.portfolioTrend || [];
+    if (!trend.length) return;
+    
+    const pad = 40;
+    const plotW = w - pad * 2;
+    const plotH = h - pad * 2;
+    const plotL = pad;
+    const plotT = pad;
+    
+    // Determine mode
+    const dataKey = TREND_MODE === 'units' ? 'units' : 'revenue';
+    const maxVal = Math.max(...trend.map(t => t[dataKey] || 0));
+    
+    // Draw grid
+    ctx.strokeStyle = '#2a2d3e';
+    ctx.lineWidth = 1;
+    for (let i = 1; i < 5; i++) {
+      const y = plotT + (plotH * i / 5);
+      ctx.beginPath();
+      ctx.moveTo(plotL, y);
+      ctx.lineTo(plotL + plotW, y);
+      ctx.stroke();
+    }
+    
+    // Axes
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(plotL, plotT);
+    ctx.lineTo(plotL, plotT + plotH);
+    ctx.lineTo(plotL + plotW, plotT + plotH);
+    ctx.stroke();
+    
+    // Plot area
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
+    ctx.beginPath();
+    trend.forEach((t, i) => {
+      const val = t[dataKey] || 0;
+      const x = plotL + (i / (trend.length - 1)) * plotW;
+      const y = plotT + plotH * (1 - val / maxVal);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.lineTo(plotL + plotW, plotT + plotH);
+    ctx.lineTo(plotL, plotT + plotH);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Line
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    trend.forEach((t, i) => {
+      const val = t[dataKey] || 0;
+      const x = plotL + (i / (trend.length - 1)) * plotW;
+      const y = plotT + plotH * (1 - val / maxVal);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    
+    // Y-axis labels
+    for (let i = 0; i <= 4; i++) {
+      const val = maxVal * i / 4;
+      const y = plotT + plotH * (1 - i/4);
+      canvasText(ctx, fmtAxis(val), plotL - 5, y - 5, {align: 'right', fontSize: 10, color: '#9096a8'});
+    }
+    
+    // X-axis labels and data point dots
+    trend.forEach((t, i) => {
+      const val = t[dataKey] || 0;
+      const x = plotL + (i / Math.max(trend.length - 1, 1)) * plotW;
+      const y = plotT + plotH * (1 - val / maxVal);
+
+      // Data point dot
+      ctx.fillStyle = '#3b82f6';
+      ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#1a1d2e';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2); ctx.stroke();
+
+      // Value label above dot
+      ctx.fillStyle = '#e8eaf0';
+      ctx.font = 'bold 10px Segoe UI,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(fmtAxis(val), x, y - 10);
+
+      // Month label below axis
+      ctx.fillStyle = '#9096a8';
+      ctx.font = '10px Segoe UI,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(t.month || '', x, plotT + plotH + 12);
+    });
+  });
+}
+
+// ── Filtering ──────────────────────────────────────────────────────────────
+function getFiltered() {
+  let filtered = RAW.customers.map(c => ({
+    ...c,
+    _rev: c.revenue,
+    _units: c.units,
+    _op: c.op_profit,
+    _revScale: 1,
+  }));
+
+  // Apply filters
+  if (DIST_FILTER !== '__all__') {
+    filtered = filtered.filter(c => c.dist === DIST_FILTER);
+  }
+
+  if (CUST_FILTER !== '__all__') {
+    filtered = filtered.filter(c => c.name === CUST_FILTER);
+  }
+
+  if (MONTH_FILTER !== '__all__') {
+    filtered = filtered.filter(c => c.months[MONTH_FILTER] && c.months[MONTH_FILTER].revenue > 0);
+  }
+
+  if (STATUS_FILTER !== '__all__') {
+    const momThresholds = { active: 0, growing: 10, declining: -1000 };
+    const threshold = momThresholds[STATUS_FILTER];
+    if (STATUS_FILTER === 'declining') {
+      filtered = filtered.filter(c => c.mom < 0);
+    } else {
+      filtered = filtered.filter(c => c.mom >= threshold);
+    }
+  }
+
+  return filtered;
+}
+
+function updateAll() {
+  const filtered = getFiltered();
+  updateBanner(filtered);
+  updateKPIs(filtered);
+  drawPareto(filtered);
+  drawQuadrant(filtered);
+  drawMix(filtered);
+  drawTrend(filtered);
+  updateTable(filtered);
+}
+
+// ── Banner ────────────────────────────────────────────────────────────────
+function updateBanner(filtered) {
+  const iceDist = filtered.filter(c => c.dist === 'icedream').length;
+  const mayDist = filtered.filter(c => c.dist === 'mayyan').length;
+  document.getElementById('banner-text').innerHTML = 
+    `<b>Sales data loaded</b> — Dec '25, Jan '26, Feb '26 (MTD) · November excluded &middot; <b>${filtered.length}</b> customers &middot; 2 distributors &middot; Brand filter: <b>Turbo</b> (ice cream) + <b>Dani's</b> (dream cake) · Price DB: 24/2`;
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────
+function updateKPIs(filtered) {
+  let janRev = 0, janU = 0, janGP = 0, janOP = 0, janCust = 0;
+  filtered.forEach(c => {
+    const m = c.months["Jan '26"];
+    if (m && m.revenue > 0) {
+      janRev  += m.revenue * c._revScale;
+      janU    += m.units   * c._revScale;
+      janCust++;
+    }
+    janGP += c.gross_profit * c._revScale;
+    janOP += c.op_profit    * c._revScale;
+  });
+  const totalF = filtered.length;
+
+  // Dec→Jan MoM for portfolio
+  const portfolioTrend = RAW.portfolioTrend;
+  let mom = 0;
+  if (portfolioTrend.length >= 2) {
+    const c = portfolioTrend[1].revenue, p = portfolioTrend[0].revenue;
+    mom = p ? (c-p)/p*100 : 0;
+  }
+  const momCls   = mom >= 0 ? 'pos' : 'neg';
+  const momSign  = mom >= 0 ? '+' : '';
+
+  document.getElementById('kpi-rev').textContent      = '₪' + fmt(janRev);
+  document.getElementById('kpi-rev-sub').innerHTML    = `<span class="${momCls}">${momSign}${mom.toFixed(1)}% vs prev month</span>`;
+  document.getElementById('kpi-units').textContent    = fmtN(Math.round(janU));
+  document.getElementById('kpi-units-sub').textContent= janCust + ' customers w/ sales';
+  document.getElementById('kpi-gp').textContent       = '₪' + fmt(janGP);
+  const gpPct = janRev > 0 ? (janGP/janRev*100) : 0;
+  document.getElementById('kpi-gp-sub').textContent   = 'Avg Gross: ' + gpPct.toFixed(1) + '%';
+  document.getElementById('kpi-op').textContent       = '₪' + fmt(janOP);
+  document.getElementById('kpi-cust').textContent     = janCust;
+  document.getElementById('kpi-cust-sub').textContent = 'of ' + totalF + ' in filter';
+  document.getElementById('kpi-mom').textContent      = momSign + mom.toFixed(1) + '%';
+  document.getElementById('kpi-mom').className        = 'val ' + (mom >= 0 ? 'green' : 'red');
+}
+
+// ── Table ──────────────────────────────────────────────────────────────
+function updateTable(filtered) {
+  const sorted = [...filtered].sort((a, b) => {
+    let aVal = a[SORT_KEY];
+    let bVal = b[SORT_KEY];
+    if (typeof aVal === 'string') {
+      return SORT_DIR * aVal.localeCompare(bVal, 'he');
+    }
+    return SORT_DIR * (aVal - bVal);
+  });
+
+  const tbody = document.getElementById('custTbody');
+  const distLabel = { icedream: "Icedream", mayyan: "Ma'ayan" };
+  
+  if (!sorted.length) {
+    tbody.innerHTML = '<tr><td class="ts" colspan="7">No customers match filter</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(c => `
+    <tr onclick="selectCustomer('${c.name.replace(/'/g, "'")}')" style="cursor:pointer">
+      <td>${c.name}</td>
+      <td style="color:#9096a8">${distLabel[c.dist] || c.dist}</td>
+      <td>₪${fmt(c.revenue)}</td>
+      <td class="${rag(c.gm_pct)}">${c.gm_pct.toFixed(1)}%</td>
+      <td>₪${fmt(c.op_profit)}</td>
+      <td>${fmtN(c.units)}</td>
+      <td class="${c.mom >= 0 ? 'mom-pos' : 'mom-neg'}">${c.mom >= 0 ? '+' : ''}${c.mom}%</td>
+    </tr>`).join('');
+}
+
+// ── Filter Controls ────────────────────────────────────────────────────
+function applyFilters() {
+  DIST_FILTER   = document.getElementById('sel-dist').value;
+  CUST_FILTER   = document.getElementById('sel-customer').value;
+  MONTH_FILTER  = document.getElementById('sel-month').value;
+  STATUS_FILTER = document.getElementById('sel-status').value;
+  updateAll();
+}
+
+function setBrand(b) {
+  BRAND_FILTER = b;
+  ['ab', 'turbo', 'danis'].forEach(id => document.getElementById('btn-' + id).classList.toggle('active', id === b));
+  updateAll();
+}
+
+function resetFilters() {
+  DIST_FILTER = CUST_FILTER = MONTH_FILTER = STATUS_FILTER = '__all__';
+  BRAND_FILTER = 'ab';
+  ['ab', 'turbo', 'danis'].forEach(id => document.getElementById('btn-' + id).classList.toggle('active', id === 'ab'));
+  document.getElementById('sel-dist').value = '__all__';
+  document.getElementById('sel-customer').value = '__all__';
+  document.getElementById('sel-month').value = '__all__';
+  document.getElementById('sel-status').value = '__all__';
+  updateAll();
+}
+
+function selectCustomer(name) {
+  document.getElementById('sel-customer').value = name;
+  CUST_FILTER = name;
+  applyFilters();
+}
+
+function sortTable(key) {
+  if (SORT_KEY === key) SORT_DIR *= -1; else { SORT_KEY = key; SORT_DIR = -1; }
+  updateTable(getFiltered());
+}
+
+// ── Populate Dropdowns ──────────────────────────────────────────────────
+function populateCustomers() {
+  const sel = document.getElementById('sel-customer');
+  const sorted = [...RAW.customers].sort((a, b) => a.name.localeCompare(b.name, 'he'));
+  sorted.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.name;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+}
+
+// ── Initialize ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  populateCustomers();
+  updateAll();
+});
+</script>
+
+</body>
+</html>

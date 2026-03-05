@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>צפי מכר פסח 2026 — גלידת דני אבדיה</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; color: #1a1a2e; direction: rtl; }
+
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    color: white; padding: 28px 40px; border-bottom: 4px solid #e94560;
+  }
+  .header h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.5px; }
+  .header .subtitle { font-size: 0.95rem; opacity: 0.75; margin-top: 4px; }
+
+  .kpis {
+    display: flex; gap: 16px; padding: 20px 40px; background: #fff;
+    border-bottom: 1px solid #e0e0e0; flex-wrap: wrap;
+  }
+  .kpi {
+    flex: 1; min-width: 150px; background: #f8f9fc; border-radius: 10px;
+    padding: 14px 18px; border-right: 4px solid #0f3460;
+  }
+  .kpi.kfp  { border-right-color: #e8c84b; background: #fffdf0; }
+  .kpi.warn { border-right-color: #e94560; background: #fff5f7; }
+  .kpi .val { font-size: 1.7rem; font-weight: 800; color: #0f3460; }
+  .kpi.kfp .val { color: #b8860b; }
+  .kpi.warn .val { color: #c0392b; }
+  .kpi .lbl { font-size: 0.78rem; color: #666; margin-top: 3px; }
+
+  .section { padding: 24px 40px; }
+  .section-title {
+    font-size: 1.1rem; font-weight: 700; color: #0f3460;
+    margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 2px solid #e94560; display: inline-block;
+  }
+
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .chart-card h3 { font-size: 0.92rem; color: #444; margin-bottom: 14px; font-weight: 600; }
+
+  .kfp-highlight {
+    background: linear-gradient(135deg, #fffbea, #fff7cc);
+    border: 2px solid #e8c84b; border-radius: 12px; padding: 16px 20px;
+    margin-bottom: 24px;
+  }
+  .kfp-highlight h3 { color: #8b6914; font-size: 0.95rem; margin-bottom: 10px; }
+  .kfp-highlight ul { list-style: none; display: flex; gap: 12px; flex-wrap: wrap; }
+  .kfp-highlight li {
+    background: rgba(255,255,255,0.8); border: 1px solid #e8c84b;
+    border-radius: 6px; padding: 6px 12px; font-size: 0.84rem; color: #5a4a00;
+    font-weight: 600;
+  }
+
+  .no-mango {
+    background: #fff0f4; border: 2px solid #e94560; border-radius: 12px;
+    padding: 14px 20px; margin-bottom: 24px;
+    font-size: 0.88rem; color: #8b0000;
+  }
+  .no-mango strong { font-size: 1rem; }
+
+  table {
+    width: 100%; border-collapse: collapse; font-size: 0.83rem;
+    background: white; border-radius: 10px; overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  th {
+    background: #0f3460; color: white; padding: 10px 12px;
+    text-align: center; font-weight: 600;
+  }
+  td { padding: 8px 12px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+  tr:hover td { background: #f8f9fc; }
+  .prod-name { font-weight: 700; text-align: right; padding-right: 16px; }
+  .kfp-cell { background: #fffcee; }
+  .kfp-num { color: #b8860b; font-size: 0.78rem; display: block; font-weight: 700; }
+  .reg-num { color: #1a1a2e; font-weight: 600; }
+  .badge { border-radius: 20px; padding: 3px 8px; font-size: 0.72rem; font-weight: 700; }
+  .badge-kfp  { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+  .badge-no   { background: #f0f0f0; color: #666; border: 1px solid #ccc; }
+  .bal-row td { background: #f8f9fc; font-size: 0.78rem; color: #555; }
+  .bal-label  { text-align: right; color: #888; font-style: italic; padding-right: 16px; }
+
+  .window-bar {
+    display: flex; align-items: center; gap: 10px; padding: 10px 40px;
+    background: #fff; border-top: 1px solid #eee; font-size: 0.83rem;
+  }
+  .window-seg {
+    flex: 1; height: 36px; border-radius: 6px; display: flex;
+    align-items: center; justify-content: center; font-weight: 700; font-size: 0.78rem;
+  }
+  .seg-pre  { background: #e8eaf6; color: #3949ab; flex: 0.7; }
+  .seg-prod { background: #fff3e0; color: #e65100; flex: 0.35; }
+  .seg-kfp  { background: linear-gradient(135deg, #fff8dc, #ffd700); color: #7b5800;
+               border: 2px solid #ffd700; flex: 1.8; font-size: 0.85rem; }
+  .seg-post { background: #e8f5e9; color: #2e7d32; flex: 1.2; }
+  .seg-label { font-size: 0.72rem; color: #999; white-space: nowrap; }
+
+  footer {
+    text-align: center; padding: 16px; color: #aaa; font-size: 0.78rem;
+    border-top: 1px solid #eee; margin-top: 20px;
+  }
+
+  /* ── Distributor table ─────────────────────────────────────────── */
+  .dist-table {
+    width: 100%; border-collapse: collapse; font-size: 0.83rem;
+    background: white; border-radius: 10px; overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-top: 20px;
+  }
+  .dist-table th {
+    background: #16213e; color: white; padding: 10px 12px;
+    text-align: center; font-weight: 600;
+  }
+  .dist-table td { padding: 8px 12px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+  .dist-table tr:hover td { background: #f8f9fc; }
+  .dist-name { font-weight: 700; text-align: right; padding-right: 16px; color: #0f3460; }
+  .total-col { font-weight: 700; background: #f0f4ff; }
+  .subtotal-row td { background: #e8edf8; font-weight: 700; color: #16213e; }
+  .subtotal { font-weight: 700; }
+  .grand-row td { background: #16213e; color: white; font-weight: 800; }
+  .grand-total { font-weight: 800; }
+  .dist-chart-wrap { background: white; border-radius: 12px; padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07); margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 צפי מכר שבועי — פסח 2026</h1>
+  <div class="subtitle">גלידת חלבון · דני אבדיה / Turbo · מחולק למלאי כשר לפסח ומלאי רגיל</div>
+</div>
+
+<!-- Timeline bar -->
+<div class="window-bar">
+  <span class="seg-label">01/03</span>
+  <div class="window-seg seg-pre">לפני חלון כשל"פ</div>
+  <div class="window-seg seg-prod">ייצור כשל"פ<br><small>08–12/03</small></div>
+  <div class="window-seg seg-kfp">⭐ חלון מכירות כשל"פ ⭐<br><small>09/03 – 26/03</small></div>
+  <div class="window-seg seg-post">חזרה לרגיל · ערב פסח 12/04</div>
+  <span class="seg-label">09/04</span>
+</div>
+
+<!-- KPIs -->
+<div class="kpis">
+  <div class="kpi kfp">
+    <div class="val">18</div>
+    <div class="lbl">משטחים כשל"פ לייצור<br>(שוקולד+וניל+פיסטוק × 6 כ"א)</div>
+  </div>
+  <div class="kpi kfp">
+    <div class="val">17</div>
+    <div class="lbl">משטחים כשל"פ צפויים להימכר<br>09/03 – 26/03</div>
+  </div>
+  <div class="kpi">
+    <div class="val">30</div>
+    <div class="lbl">משטחים מלאי רגיל קיים<br>(מחסן + מפיצים)</div>
+  </div>
+  <div class="kpi">
+    <div class="val">18.6</div>
+    <div class="lbl">משטחים רגיל צפויים להימכר<br>01/03 – 09/04</div>
+  </div>
+  <div class="kpi warn">
+    <div class="val">11</div>
+    <div class="lbl">משטחים רגיל יתרה אחרי 09/04<br>(כולל מנגו)</div>
+  </div>
+  <div class="kpi">
+    <div class="val">0.7</div>
+    <div class="lbl">משטחים כשל"פ יתרה אחרי 09/04<br>(יעד: 0)</div>
+  </div>
+</div>
+
+<div class="section">
+  <!-- Mango alert -->
+  <div class="no-mango">
+    🥭 <strong>מנגו — ללא ייצור כשל"פ</strong> | פיסטוק (טעם חדש) צפוי לקחת את נתח הביקוש הפסחי.
+    מלאי מנגו רגיל קיים: 12.0 משטחים — ימשיך להימכר בקצב רגיל לאורך כל התקופה.
+  </div>
+
+  <!-- KFP production timeline -->
+  <div class="kfp-highlight">
+    <h3>⚙️ לוח ייצור כשל"פ (תחילת ייצור 08/03)</h3>
+    <ul><li>08/03 — פיסטוק 4 מש׳</li><li>09/03 — פיסטוק 2 מש׳</li><li>09/03 — שוקולד 2 מש׳</li><li>10/03 — שוקולד 4 מש׳</li><li>11/03 — וניל 4 מש׳</li><li>12/03 — וניל 2 מש׳</li></ul>
+  </div>
+
+  <!-- Charts -->
+  <span class="section-title">מכירות שבועיות — מלאי כשל"פ vs מלאי רגיל</span>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3>📦 משטחים שנמכרו בשבוע (כשל"פ + רגיל לפי מוצר)</h3>
+      <canvas id="salesChart" height="280"></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>📉 יתרת מלאי סוף שבוע (משטחים)</h3>
+      <canvas id="balanceChart" height="280"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="section">
+  <span class="section-title">טבלת צפי מפורטת — יחידות משטחים לפי שבוע</span>
+  <p style="font-size:0.8rem; color:#888; margin-bottom:12px;">
+    🔵 מספר כחול = מכירות מלאי רגיל (משטחים) &nbsp;|&nbsp;
+    ⭐ מספר זהוב = מכירות מלאי כשל"פ (משטחים) &nbsp;|&nbsp;
+    שורות יתרה = מלאי נותר בסוף שבוע
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>מוצר</th><th>כשל"פ?</th>
+        <th>01/03–07/03</th><th>08/03–14/03</th><th>15/03–21/03</th><th>22/03–28/03</th><th>29/03–04/04</th><th>05/04–09/04</th>
+      </tr>
+    </thead>
+    <tbody><tr><td class='prod-name'>שוקולד</td><td><span class="badge badge-kfp">כשל"פ ✓</span></td><td class=''><span class='reg-num'>1.3</span></td><td class='kfp-cell'><span class='reg-num'>1.3</span><span class='kfp-num'>+2.0 כשל"פ</span></td><td class='kfp-cell'><span class='reg-num'>1.3</span><span class='kfp-num'>+2.3 כשל"פ</span></td><td class='kfp-cell'><span class='reg-num'>1.3</span><span class='kfp-num'>+1.7 כשל"פ</span></td><td class=''><span class='reg-num'>1.3</span></td><td class=''><span class='reg-num'>0.7</span></td></tr><tr><td class='prod-name'>וניל</td><td><span class="badge badge-kfp">כשל"פ ✓</span></td><td class=''><span class='reg-num'>1.3</span></td><td class='kfp-cell'><span class='reg-num'>1.3</span><span class='kfp-num'>+1.3 כשל"פ</span></td><td class='kfp-cell'><span class='reg-num'>1.3</span><span class='kfp-num'>+2.3 כשל"פ</span></td><td class='kfp-cell'><span class='reg-num'>1.3</span><span class='kfp-num'>+1.7 כשל"פ</span></td><td class=''><span class='reg-num'>1.3</span></td><td class=''><span class='reg-num'>0.9</span></td></tr><tr><td class='prod-name'>מנגו</td><td><span class="badge badge-no">ללא כשל"פ</span></td><td class=''><span class='reg-num'>0.8</span></td><td class=''><span class='reg-num'>0.8</span></td><td class=''><span class='reg-num'>0.8</span></td><td class=''><span class='reg-num'>0.8</span></td><td class=''><span class='reg-num'>0.8</span></td><td class=''><span class='reg-num'>0.5</span></td></tr><tr><td class='prod-name'>פיסטוק</td><td><span class="badge badge-kfp">כשל"פ ✓</span></td><td class=''><span class='reg-num'>0.0</span></td><td class='kfp-cell'><span class='reg-num'>0.0</span><span class='kfp-num'>+2.0 כשל"פ</span></td><td class='kfp-cell'><span class='reg-num'>0.0</span><span class='kfp-num'>+2.3 כשל"פ</span></td><td class='kfp-cell'><span class='reg-num'>0.0</span><span class='kfp-num'>+1.7 כשל"פ</span></td><td class=''><span class='reg-num'>0.0</span></td><td class=''><span class='reg-num'>0.0</span></td></tr><tr class='bal-row'><td colspan='2' class='bal-label'>יתרה סוף שבוע — שוקולד</td><td><small>5.7🔵 </small></td><td><small>4.5🔵 <span class='kfp-num'>4.0✡</span></small></td><td><small>3.2🔵 <span class='kfp-num'>1.7✡</span></small></td><td><small>2.0🔵 </small></td><td><small>0.7🔵 </small></td><td><small>0.0🔵 </small></td></tr><tr class='bal-row'><td colspan='2' class='bal-label'>יתרה סוף שבוע — וניל</td><td><small>9.5🔵 </small></td><td><small>8.2🔵 <span class='kfp-num'>4.7✡</span></small></td><td><small>7.0🔵 <span class='kfp-num'>2.3✡</span></small></td><td><small>5.7🔵 <span class='kfp-num'>0.7✡</span></small></td><td><small>4.4🔵 <span class='kfp-num'>0.7✡</span></small></td><td><small>3.5🔵 <span class='kfp-num'>0.7✡</span></small></td></tr><tr class='bal-row'><td colspan='2' class='bal-label'>יתרה סוף שבוע — מנגו</td><td><small>11.2🔵 </small></td><td><small>10.5🔵 </small></td><td><small>9.7🔵 </small></td><td><small>9.0🔵 </small></td><td><small>8.2🔵 </small></td><td><small>7.7🔵 </small></td></tr><tr class='bal-row'><td colspan='2' class='bal-label'>יתרה סוף שבוע — פיסטוק</td><td><small>0.0🔵 </small></td><td><small>0.0🔵 <span class='kfp-num'>4.0✡</span></small></td><td><small>0.0🔵 <span class='kfp-num'>1.7✡</span></small></td><td><small>0.0🔵 </small></td><td><small>0.0🔵 </small></td><td><small>0.0🔵 </small></td></tr></tbody>
+  </table>
+</div>
+
+<!-- Distributor KFP weekly pull section -->
+<div class="section">
+  <span class="section-title">חלוקת ייצור כשל"פ למפיצים — צפי משיכות שבועי</span>
+  <p style="font-size:0.8rem; color:#888; margin-bottom:16px;">
+    חלוקה פרופורציונלית לפי צפי מכירות פברואר · 3 שבועות חלון כשל"פ (09/03–26/03) · סה"כ 18 משטחים
+  </p>
+  <div class="dist-chart-wrap">
+    <h3 style="font-size:0.92rem; color:#444; margin-bottom:14px; font-weight:600;">
+      📦 צפי משיכות שבועיות — כשל"פ לפי מפיץ ומוצר (משטחים)
+    </h3>
+    <canvas id="distChart" height="200"></canvas>
+  </div>
+  <table class="dist-table"><thead><tr><th>מפיץ</th><th>מוצר</th><th>08/03–14/03</th><th>15/03–21/03</th><th>22/03–26/03</th><th>סה"כ</th></tr></thead><tbody><tr><td class="dist-name">מעיין נציגויות</td><td>שוקולד</td><td>1.7</td><td>1.9</td><td>1.4</td><td class="total-col">5</td></tr><tr><td class="dist-name">מעיין נציגויות</td><td>וניל</td><td>1.7</td><td>1.9</td><td>1.4</td><td class="total-col">5</td></tr><tr><td class="dist-name">מעיין נציגויות</td><td>פיסטוק</td><td>1.3</td><td>1.6</td><td>1.1</td><td class="total-col">4</td></tr><tr class="subtotal-row"><td colspan="2">סה"כ מעיין נציגויות</td><td class="subtotal">4.7</td><td class="subtotal">5.4</td><td class="subtotal">3.9</td><td class="subtotal total-col">14</td></tr><tr><td class="dist-name">אייסדרים</td><td>שוקולד</td><td>0.3</td><td>0.4</td><td>0.3</td><td class="total-col">1</td></tr><tr><td class="dist-name">אייסדרים</td><td>וניל</td><td>0.3</td><td>0.4</td><td>0.3</td><td class="total-col">1</td></tr><tr><td class="dist-name">אייסדרים</td><td>פיסטוק</td><td>0.7</td><td>0.8</td><td>0.6</td><td class="total-col">2</td></tr><tr class="subtotal-row"><td colspan="2">סה"כ אייסדרים</td><td class="subtotal">1.3</td><td class="subtotal">1.6</td><td class="subtotal">1.2</td><td class="subtotal total-col">4</td></tr><tr class="grand-row"><td colspan="2">🔢 סה"כ כולל</td><td class="grand-total">6.0</td><td class="grand-total">7.0</td><td class="grand-total">5.1</td><td class="grand-total total-col">18</td></tr></tbody></table>
+</div>
+
+<footer>
+  נוצר אוטומטית · Raito · נתוני בסיס: פברואר 2026 MTD · ייצור כשל"פ מ-08/03/2026
+</footer>
+
+<script>
+// ── Sales stacked bar chart ─────────────────────────────────────────────────
+const salesCtx = document.getElementById('salesChart');
+const salesData = {
+  labels: ["01/03\u201307/03", "08/03\u201314/03", "15/03\u201321/03", "22/03\u201328/03", "29/03\u201304/04", "05/04\u201309/04"],
+  datasets: [{"label": "כשל\"פ שוקולד", "data": [0.0, 2.0, 2.33, 1.67, 0.0, 0.0], "backgroundColor": "#E8956D", "stack": "kfp", "borderWidth": 1, "borderColor": "#fff"}, {"label": "כשל\"פ וניל", "data": [0.0, 1.33, 2.33, 1.67, 0.0, 0.0], "backgroundColor": "#F5D060", "stack": "kfp", "borderWidth": 1, "borderColor": "#fff"}, {"label": "כשל\"פ פיסטוק", "data": [0.0, 2.0, 2.33, 1.67, 0.0, 0.0], "backgroundColor": "#8DCE6E", "stack": "kfp", "borderWidth": 1, "borderColor": "#fff"}, {"label": "רגיל שוקולד", "data": [1.26, 1.26, 1.26, 1.26, 1.26, 0.71], "backgroundColor": "#7B4B2A", "stack": "regular", "borderWidth": 1, "borderColor": "#fff"}, {"label": "רגיל וניל", "data": [1.27, 1.27, 1.27, 1.27, 1.27, 0.9], "backgroundColor": "#C49A3C", "stack": "regular", "borderWidth": 1, "borderColor": "#fff"}, {"label": "רגיל מנגו", "data": [0.76, 0.76, 0.76, 0.76, 0.76, 0.54], "backgroundColor": "#D4660A", "stack": "regular", "borderWidth": 1, "borderColor": "#fff"}, {"label": "רגיל פיסטוק", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "backgroundColor": "#4A7C3F", "stack": "regular", "borderWidth": 1, "borderColor": "#fff"}]
+};
+new Chart(salesCtx, {
+  type: 'bar',
+  data: salesData,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} מש׳`
+        }
+      }
+    },
+    scales: {
+      x: {
+        stacked: true,
+        ticks: { font: { size: 11 }, maxRotation: 0 },
+        grid: { display: false }
+      },
+      y: {
+        stacked: true,
+        title: { display: true, text: 'משטחים' },
+        ticks: { font: { size: 11 } }
+      }
+    }
+  }
+});
+
+// ── Distributor KFP weekly pull chart ───────────────────────────────────────
+const distCtx = document.getElementById('distChart');
+new Chart(distCtx, {
+  type: 'bar',
+  data: {
+    labels: ["08/03\u201314/03", "15/03\u201321/03", "22/03\u201326/03"],
+    datasets: [{"label": "מעיין נציגויות — שוקולד", "data": [1.7, 1.9, 1.4], "backgroundColor": "#7B4B2A", "stack": "mayyan", "borderWidth": 1, "borderColor": "#fff"}, {"label": "אייסדרים — שוקולד", "data": [0.3, 0.4, 0.3], "backgroundColor": "#C08060", "stack": "icedream", "borderWidth": 1, "borderColor": "#fff"}, {"label": "מעיין נציגויות — וניל", "data": [1.7, 1.9, 1.4], "backgroundColor": "#C49A3C", "stack": "mayyan", "borderWidth": 1, "borderColor": "#fff"}, {"label": "אייסדרים — וניל", "data": [0.3, 0.4, 0.3], "backgroundColor": "#E8CB70", "stack": "icedream", "borderWidth": 1, "borderColor": "#fff"}, {"label": "מעיין נציגויות — פיסטוק", "data": [1.3, 1.6, 1.1], "backgroundColor": "#4A7C3F", "stack": "mayyan", "borderWidth": 1, "borderColor": "#fff"}, {"label": "אייסדרים — פיסטוק", "data": [0.7, 0.8, 0.6], "backgroundColor": "#80B870", "stack": "icedream", "borderWidth": 1, "borderColor": "#fff"}]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 14 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} מש׳`
+        }
+      }
+    },
+    scales: {
+      x: {
+        stacked: true,
+        ticks: { font: { size: 12 }, maxRotation: 0 },
+        grid: { display: false }
+      },
+      y: {
+        stacked: true,
+        title: { display: true, text: 'משטחים' },
+        ticks: { font: { size: 11 }, stepSize: 1 }
+      }
+    }
+  }
+});
+
+// ── Balance line chart ─────────────────────────────────────────────────────
+const balCtx = document.getElementById('balanceChart');
+const balData = {
+  labels: ["01/03\u201307/03", "08/03\u201314/03", "15/03\u201321/03", "22/03\u201328/03", "29/03\u201304/04", "05/04\u201309/04"],
+  datasets: [{"label": "מלאי רגיל — שוקולד", "data": [5.7, 4.5, 3.2, 2.0, 0.7, 0.0], "borderColor": "#7B4B2A", "backgroundColor": "#7B4B2A22", "tension": 0.3, "borderDash": [], "fill": false}, {"label": "מלאי כשל\"פ — שוקולד", "data": [0.0, 4.0, 1.7, 0.0, 0.0, 0.0], "borderColor": "#E8956D", "backgroundColor": "#E8956D22", "tension": 0.3, "borderDash": [6, 3], "fill": false}, {"label": "מלאי רגיל — וניל", "data": [9.5, 8.2, 7.0, 5.7, 4.4, 3.5], "borderColor": "#C49A3C", "backgroundColor": "#C49A3C22", "tension": 0.3, "borderDash": [], "fill": false}, {"label": "מלאי כשל\"פ — וניל", "data": [0.0, 4.7, 2.3, 0.7, 0.7, 0.7], "borderColor": "#F5D060", "backgroundColor": "#F5D06022", "tension": 0.3, "borderDash": [6, 3], "fill": false}, {"label": "מלאי רגיל — מנגו", "data": [11.2, 10.5, 9.7, 9.0, 8.2, 7.7], "borderColor": "#D4660A", "backgroundColor": "#D4660A22", "tension": 0.3, "borderDash": [], "fill": false}, {"label": "מלאי רגיל — פיסטוק", "data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "borderColor": "#4A7C3F", "backgroundColor": "#4A7C3F22", "tension": 0.3, "borderDash": [], "fill": false}, {"label": "מלאי כשל\"פ — פיסטוק", "data": [0.0, 4.0, 1.7, 0.0, 0.0, 0.0], "borderColor": "#8DCE6E", "backgroundColor": "#8DCE6E22", "tension": 0.3, "borderDash": [6, 3], "fill": false}]
+};
+new Chart(balCtx, {
+  type: 'line',
+  data: balData,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 10 }, boxWidth: 14 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} מש׳`
+        }
+      }
+    },
+    scales: {
+      x: {
+        ticks: { font: { size: 11 }, maxRotation: 0 },
+        grid: { color: '#f0f0f0' }
+      },
+      y: {
+        title: { display: true, text: 'משטחים נותרים' },
+        ticks: { font: { size: 11 } },
+        grid: { color: '#f0f0f0' }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
