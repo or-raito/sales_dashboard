@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="he" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Customer-Centric Trade &amp; Sales Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3348;
+  --text:#e2e8f0;--text2:#8892a4;--accent:#4f8ef7;--green:#22c55e;
+  --amber:#f59e0b;--red:#ef4444;--purple:#a855f7;--orange:#f97316;
+  --radius:10px;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header h1{font-size:17px;font-weight:700}
+.header h1 span{font-weight:400;color:var(--text2);font-size:13px;margin-left:8px}
+.badges{display:flex;gap:8px}
+.badge{background:var(--surface2);border:1px solid var(--border);padding:3px 10px;border-radius:20px;font-size:11px;color:var(--text2)}
+.badge.green{border-color:var(--green);color:var(--green)}
+.badge.amber{border-color:var(--amber);color:var(--amber)}
+.filter-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.fgroup{display:flex;align-items:center;gap:5px}
+.fgroup label{font-size:11px;color:var(--text2);white-space:nowrap}
+select,input[type=text]{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 9px;border-radius:6px;font-size:12px;outline:none;cursor:pointer}
+select:focus,input:focus{border-color:var(--accent)}
+.btn{padding:5px 13px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;border:none}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.35);color:var(--accent);padding:3px 9px;border-radius:20px;font-size:11px;display:flex;align-items:center;gap:5px}
+.chip button{background:none;border:none;color:inherit;cursor:pointer}
+.main{padding:18px 24px;display:flex;flex-direction:column;gap:18px}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+@media(max-width:1300px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:15px;transition:border-color .2s}
+.kpi-card:hover{border-color:var(--accent)}
+.kpi-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.kpi-value{font-size:21px;font-weight:700}
+.kpi-meta{margin-top:5px;font-size:11px;color:var(--text2)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:3px}
+.dot-g{background:var(--green)}.dot-a{background:var(--amber)}.dot-r{background:var(--red)}
+.up{color:var(--green)}.down{color:var(--red)}
+.row2{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.row2b{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:17px}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.pt{font-size:13px;font-weight:600}
+.ps{font-size:11px;color:var(--text2);margin-top:2px}
+.tab-grp{display:flex;gap:4px}
+.tab{background:none;border:1px solid var(--border);color:var(--text2);padding:4px 9px;border-radius:4px;font-size:11px;cursor:pointer}
+.tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab.on-turbo{background:#0ea5e9;border-color:#0ea5e9;color:#fff}
+.tab.on-danis{background:var(--purple);border-color:var(--purple);color:#fff}
+.chart-box{position:relative;height:255px}
+.tpanel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:17px}
+.tsearch{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 11px;border-radius:6px;font-size:12px;width:210px;outline:none}
+.tsearch:focus{border-color:var(--accent)}
+table.dt{width:100%;border-collapse:collapse;font-size:12px;margin-top:11px}
+table.dt th{background:var(--surface2);color:var(--text2);font-weight:600;padding:8px 11px;text-align:left;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none}
+table.dt th:hover{color:var(--accent)}
+table.dt td{padding:8px 11px;border-bottom:1px solid rgba(46,51,72,0.45);color:var(--text)}
+table.dt tr:hover td{background:rgba(79,142,247,0.05);cursor:pointer}
+table.dt tr.sel td{background:rgba(79,142,247,0.1);border-left:3px solid var(--accent)}
+.pct-bar{display:flex;align-items:center;gap:6px}
+.bar-bg{background:var(--surface2);border-radius:3px;height:5px;width:55px;flex-shrink:0}
+.bar-fg{height:100%;border-radius:3px}
+.drawer{display:none;position:fixed;right:0;top:0;bottom:0;width:430px;background:var(--surface);border-left:1px solid var(--border);z-index:200;padding:22px;overflow-y:auto;box-shadow:-6px 0 30px rgba(0,0,0,0.5)}
+.drawer.open{display:block}
+.dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.dt-name{font-size:15px;font-weight:700}
+.dclose{background:none;border:1px solid var(--border);color:var(--text);padding:4px 9px;border-radius:5px;cursor:pointer;font-size:12px}
+.dkpis{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px;margin-top:14px}
+.dkpi{background:var(--surface2);border-radius:7px;padding:11px}
+.dkpi-l{font-size:10px;color:var(--text2);margin-bottom:3px}
+.dkpi-v{font-size:15px;font-weight:700}
+.sec{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;margin-top:16px}
+.dch{height:150px;margin-bottom:4px}
+.dtag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600}
+.dtag.active{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.25)}
+.dtag.negotiation{background:rgba(245,158,11,0.12);color:var(--amber);border:1px solid rgba(245,158,11,0.25)}
+.dtag.sales-only{background:rgba(79,142,247,0.12);color:var(--accent);border:1px solid rgba(79,142,247,0.25)}
+.brand-tag{display:inline-block;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:600;margin-left:4px}
+.brand-turbo{background:rgba(14,165,233,0.12);color:#0ea5e9;border:1px solid rgba(14,165,233,0.25)}
+.brand-danis{background:rgba(168,85,247,0.12);color:var(--purple);border:1px solid rgba(168,85,247,0.25)}
+table.skut{width:100%;border-collapse:collapse;font-size:11px}
+table.skut th{color:var(--text2);font-weight:600;padding:5px 7px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+table.skut td{padding:5px 7px;border-bottom:1px solid rgba(46,51,72,0.35);color:var(--text)}
+.ql-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:10px}
+.ql{padding:4px 7px;border-radius:4px;font-size:10px;text-align:center}
+.ql.star{background:rgba(34,197,94,0.08);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.ql.risk{background:rgba(239,68,68,0.08);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+.ql.em{background:rgba(79,142,247,0.08);color:var(--accent);border:1px solid rgba(79,142,247,0.2)}
+.ql.tail{background:rgba(100,116,139,0.08);color:var(--text2);border:1px solid var(--border)}
+.info-banner{background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:14px;font-size:12px;color:var(--text2)}
+.info-banner strong{color:var(--text)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Weekly chart */
+.weekly-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:0}
+.weekly-box{position:relative;height:320px}
+.wlegend{display:flex;gap:18px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.wleg-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text2)}
+.wleg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.wleg-line{width:22px;height:3px;border-radius:2px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Trade &amp; Sales Dashboard <span>Customer-Centric · Dec '25 – Feb '26</span></h1>
+  <div class="badges">
+    <span class="badge">ISR</span>
+    <span class="badge">Ice Cream / Frozen</span>
+    <span class="badge green">● Sales Data Loaded</span>
+    <span class="badge amber">Feb = Complete Month</span>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <div class="fgroup"><label>Customer</label>
+    <select id="f-cust" onchange="applyFilters()"><option value="all">All Customers</option></select></div>
+  <div class="fgroup"><label>Distributor</label>
+    <select id="f-dist" onchange="applyFilters()">
+      <option value="all">All</option>
+      <option value="אייסדרים">אייסדרים (Icedream)</option>
+      <option value="מעיין">מעיין נציגויות</option>
+      <option value="none">No Pricing Data</option>
+    </select></div>
+  <div class="fgroup"><label>Status</label>
+    <select id="f-status" onchange="applyFilters()">
+      <option value="all">All</option>
+      <option value="active">Active</option>
+      <option value="negotiation">Negotiation</option>
+    </select></div>
+  <div class="fgroup"><label>Month</label>
+    <select id="f-month" onchange="applyFilters()">
+      <option value="jan">January 2026</option>
+      <option value="feb">February 2026</option>
+      <option value="dec">December 2025</option>
+      <option value="total">All Months</option>
+    </select></div>
+  <div class="fgroup"><label>Brand</label>
+    <div class="tab-grp">
+      <button class="tab on" id="bb-all"   onclick="setBrand('all')">All Brands</button>
+      <button class="tab"    id="bb-turbo" onclick="setBrand('turbo')">Turbo</button>
+      <button class="tab"    id="bb-danis" onclick="setBrand('danis')">Dani's</button>
+    </div>
+  </div>
+  <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+  <div class="chips" id="chips"></div>
+</div>
+
+<div class="main">
+
+  <div class="info-banner">
+    <span style="font-size:20px">✅</span>
+    <div><strong>Sales data loaded — Dec '25, Jan '26, Feb '26 · November excluded</strong> &nbsp;·&nbsp;
+    19 customers · 2 distributors · Brand filter: <strong>Turbo</strong> (ice cream) + <strong>Dani's</strong> (dream cake) · Price DB: 24/2</div>
+  </div>
+
+  <div class="weekly-panel">
+    <div class="ph">
+      <div>
+        <div class="pt">Weekly Sales Trend — Icedreams vs Mayyan</div>
+        <div class="ps">28/12–22/2 2026 · כל נקודה = יום ראשון של השבוע · Icedreams W1–W9 · מעיין W6–W9</div>
+      </div>
+      <div class="tab-grp">
+        <button class="tab on" id="wb-rev" onclick="setWeeklyMode('rev')">Revenue ₪</button>
+        <button class="tab" id="wb-u" onclick="setWeeklyMode('units')">Units</button>
+      </div>
+    </div>
+    <div class="weekly-box"><canvas id="c-weekly"></canvas></div>
+    <div class="wlegend" id="wlegend"></div>
+  </div>
+
+  <div class="kpi-grid" id="kpi-grid"></div>
+
+  <div class="row2">
+    <div class="panel">
+      <div class="ph">
+        <div><div class="pt">Customer Revenue Ranking — Pareto</div><div class="ps">Click bar → customer detail · color = Gross Margin RAG</div></div>
+        <div class="tab-grp">
+          <button class="tab on" id="pb-rev" onclick="setParetoMode('revenue')">Revenue</button>
+          <button class="tab"    id="pb-u"   onclick="setParetoMode('units')">Units</button>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="c-pareto"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div><div class="pt">Growth Quadrant</div><div class="ps">Revenue vs MoM Growth · bubble = units</div></div></div>
+      <div class="chart-box"><canvas id="c-scatter"></canvas></div>
+      <div class="ql-grid">
+        <div class="ql star">⭐ Stars</div><div class="ql risk">⚠️ At-Risk</div>
+        <div class="ql em">🚀 Emerging</div><div class="ql tail">📉 Declining</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row2b">
+    <div class="panel">
+      <div class="ph"><div><div class="pt">Product Mix per Customer</div><div class="ps">Units share by SKU · all months combined</div></div></div>
+      <div class="chart-box"><canvas id="c-mix"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="ph">
+        <div><div class="pt">Portfolio Revenue Trend</div><div class="ps">Monthly VAT0 + units · Feb = Complete Month</div></div>
+        <div class="tab-grp">
+          <button class="tab on" id="tb-r" onclick="setTrendMode('rev')">Revenue</button>
+          <button class="tab"    id="tb-u" onclick="setTrendMode('units')">Units</button>
+        </div>
+      </div>
+      <div class="chart-box"><canvas id="c-trend"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tpanel">
+    <div class="ph">
+      <div><div class="pt">Customer Performance Table</div><div class="ps">Click row → customer detail</div></div>
+      <input class="tsearch" id="t-search" placeholder="Search customer…" oninput="renderTable()"/>
+    </div>
+    <table class="dt">
+      <thead><tr id="t-head">
+        <th onclick="sortBy('name')">Customer ↕</th>
+        <th onclick="sortBy('revActive')">Revenue ↕</th>
+        <th>VAT18%</th>
+        <th onclick="sortBy('share')">Share % ↕</th>
+        <th onclick="sortBy('grossMargin')">Gross % ↕</th>
+        <th onclick="sortBy('grossVal')">Gross ₪ ↕</th>
+        <th onclick="sortBy('opMargin')">Op % ↕</th>
+        <th onclick="sortBy('opVal')">Op ₪ ↕</th>
+        <th onclick="sortBy('unitsActive')">Units ↕</th>
+        <th onclick="sortBy('momGrowth')">MoM ↕</th>
+        <th onclick="sortBy('distributor')">Distributor ↕</th>
+        <th onclick="sortBy('status')">Status ↕</th>
+      </tr></thead>
+      <tbody id="t-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="drawer" id="drawer">
+  <div class="dh">
+    <div class="dt-name" id="d-name">—</div>
+    <button class="dclose" onclick="closeDrawer()">✕ Close</button>
+  </div>
+  <div id="d-tag-row" style="margin-bottom:4px"></div>
+  <div class="dkpis" id="d-kpis"></div>
+  <div class="sec">Monthly Revenue (Dec – Feb 2026)</div>
+  <div class="dch"><canvas id="d-chart"></canvas></div>
+  <div class="sec" id="d-sku-sec">SKU Price List</div>
+  <table class="skut">
+    <thead><tr><th>Product</th><th>VAT0</th><th>VAT18%</th><th>Cost</th><th>Gross%</th><th>Op%</th><th>Dist%</th></tr></thead>
+    <tbody id="d-skus"></tbody>
+  </table>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+// Nov excluded. Feb = complete month. Sub-customers extracted from detail sheets.
+// Brand: turbo = ice cream (Turbo brand), danis = dream cake (Dani's brand)
+// Price DB updated: 24/2 — אייסדרים dist 15%, dream_cake cost 53.5
+// Revenue verified against actual files: ICEDREAM-*.xlsx (actual invoice) + Mayyan_Turbo.xlsx (units×₪13.8)
+
+const customers = [
+  {id:1,  name:"AMPM",          status:"active",      distributor:"מעיין נציגויות", dist_pct:25, avgPrice:12.36,  grossMargin:47.42, opMargin:22.42, activeSKUs:4,  hasPricing:true,  hasSales:true, brands:['turbo'],
+          revenue:{dec:267885, jan:55503.6, feb:152324.4},  units:{dec:19412, jan:4022,  feb:11038}, momGrowth:174.4},
+  {id:2,  name:"אלונית",        status:"active",      distributor:"מעיין נציגויות", dist_pct:25, avgPrice:12.25,  grossMargin:46.95, opMargin:21.95, activeSKUs:4,  hasPricing:true,  hasSales:true, brands:['turbo'],
+          revenue:{dec:20452,  jan:19403,  feb:23846.4},   units:{dec:1482,  jan:1406,  feb:1728},   momGrowth:22.9},
+  {id:3,  name:"גוד פארם",      status:"active",      distributor:"אייסדרים",       dist_pct:15, avgPrice:12.67,  grossMargin:48.70, opMargin:33.70, activeSKUs:4,  hasPricing:true,  hasSales:true, brands:['turbo'],
+          revenue:{dec:0,      jan:14620,  feb:0},   units:{dec:0,     jan:1128,  feb:0},   momGrowth:-100.0},
+  {id:4,  name:"דלק",           status:"active",      distributor:"מעיין נציגויות", dist_pct:25, avgPrice:12.74,  grossMargin:48.98, opMargin:23.98, activeSKUs:4,  hasPricing:true,  hasSales:true, brands:['turbo'],
+          revenue:{dec:31892,  jan:20755.2,feb:13772.4},   units:{dec:2311,  jan:1504,  feb:998},   momGrowth:-33.6},
+  {id:5,  name:"וולט מרקט",    status:"active",      distributor:"אייסדרים",       dist_pct:15, avgPrice:40.81,  grossMargin:37.44, opMargin:22.44, activeSKUs:6,  hasPricing:true,  hasSales:true, brands:['turbo','danis'],
+          revenue:{dec:628497.89, jan:496311.6, feb:380717.09},
+          turboRev:{dec:146651.89,jan:17082.6, feb:84618.6}, danisRev:{dec:481846, jan:479229, feb:296098.49},
+          units:{dec:17586, jan:8924, feb:9685},
+          turboUnits:{dec:10416, jan:729,  feb:6034},    danisUnits:{dec:7170, jan:8195, feb:3651},
+          momGrowth:8.5},
+  {id:6,  name:"טיב טעם",       status:"active",      distributor:"מעיין נציגויות", dist_pct:25, avgPrice:14.2,   grossMargin:54.23, opMargin:29.23, activeSKUs:4,  hasPricing:true,  hasSales:true, brands:['turbo'],
+          revenue:{dec:45954,  jan:13027.2,feb:22080},   units:{dec:3330,  jan:944,   feb:1600},   momGrowth:69.5},
+  {id:7,  name:"ינגו דלי",      status:"active",      distributor:"אייסדרים",       dist_pct:15, avgPrice:29.42,  grossMargin:40.25, opMargin:25.25, activeSKUs:6,  hasPricing:true,  hasSales:true, brands:['turbo','danis'],
+          revenue:{dec:25173,  jan:33111.25,feb:25041.13},
+          turboRev:{dec:2673,  jan:5953.25, feb:13041.14},  danisRev:{dec:22500, jan:27158, feb:11999.99},
+          units:{dec:348, jan:663, feb:1046},
+          turboUnits:{dec:198, jan:441, feb:966},       danisUnits:{dec:150, jan:222, feb:80},
+          momGrowth:57.8},
+  {id:8,  name:"כרמלה",         status:"active",      distributor:"אייסדרים",       dist_pct:15, avgPrice:22.23,  grossMargin:43.49, opMargin:28.49, activeSKUs:6,  hasPricing:true,  hasSales:true, brands:['turbo','danis'],
+          revenue:{dec:13440.58,jan:2669.88, feb:2676.27},
+          turboRev:{dec:13440.58,jan:0,    feb:1341.13},      danisRev:{dec:0,    jan:2669.88,feb:1335.14},
+          units:{dec:960, jan:30, feb:105},
+          turboUnits:{dec:960, jan:0, feb:90},           danisUnits:{dec:0,   jan:30,  feb:15},
+          momGrowth:250.0},
+  {id:9,  name:"נוי השדה",      status:"active",      distributor:"אייסדרים",       dist_pct:15, avgPrice:13.59,  grossMargin:49.53, opMargin:34.53, activeSKUs:5,  hasPricing:true,  hasSales:true, brands:['turbo','danis'],
+          revenue:{dec:12183.29,jan:13679,  feb:0},
+          turboRev:{dec:12183.29,jan:13679,feb:0},   danisRev:{dec:0,    jan:0,  feb:0},
+          units:{dec:930, jan:1044, feb:0},
+          turboUnits:{dec:930, jan:1044, feb:0},      danisUnits:{dec:0,   jan:0,   feb:0},
+          momGrowth:-100.0},
+  {id:10, name:"קארפור",        status:"negotiation", distributor:"מעיין נציגויות", dist_pct:25, avgPrice:13.8,   grossMargin:52.9,  opMargin:27.9,  activeSKUs:3,  hasPricing:true,  hasSales:false, brands:['turbo'],
+          revenue:{dec:0, jan:0, feb:0}, units:{dec:0, jan:0, feb:0}, momGrowth:null},
+  {id:11, name:"שוק פרטי",      status:"active",      distributor:"מעיין נציגויות", dist_pct:25, avgPrice:14.1,   grossMargin:53.9,  opMargin:28.9,  activeSKUs:4,  hasPricing:true,  hasSales:true, brands:['turbo'],
+          revenue:{dec:372544.8,jan:198375, feb:269652}, units:{dec:26996, jan:14375, feb:19540}, momGrowth:35.9},
+  {id:12, name:"עוגיפלצת",     status:"active",      distributor:"אייסדרים",       dist_pct:15, avgPrice:null,   grossMargin:null,  opMargin:null,  activeSKUs:3,  hasPricing:false, hasSales:true, brands:['turbo'],
+          revenue:{dec:0, jan:0, feb:19967.79}, units:{dec:0, jan:0, feb:1582}, momGrowth:null},
+  {id:13, name:"פז יילו",        status:"active",      distributor:"מעיין נציגויות", dist_pct:25, avgPrice:11.0,   grossMargin:40.91, opMargin:15.91, activeSKUs:3,  hasPricing:true,  hasSales:true, brands:['turbo'],
+          revenue:{dec:37426,  jan:81365,  feb:90459},  units:{dec:2712,  jan:5896,  feb:6555},  momGrowth:11.2},
+  {id:14, name:"פז סופר יודה",  status:"active",      distributor:"מעיין נציגויות", dist_pct:25, avgPrice:11.0,   grossMargin:40.91, opMargin:15.91, activeSKUs:3,  hasPricing:true,  hasSales:true, brands:['turbo'],
+          revenue:{dec:67234,  jan:20051,  feb:25392},  units:{dec:4872,  jan:1453,  feb:1840},  momGrowth:26.6},
+  {id:15, name:"סונול",         status:"active",      distributor:"מעיין נציגויות", dist_pct:25, avgPrice:14.0,   grossMargin:53.57, opMargin:28.57, activeSKUs:3,  hasPricing:true,  hasSales:true, brands:['turbo'],
+          revenue:{dec:8611.2, jan:6734,   feb:6596.4},   units:{dec:624,   jan:488,   feb:478},   momGrowth:-2.0},
+  {id:16, name:"דומינוס",       status:"active",      distributor:"אייסדרים",       dist_pct:15, avgPrice:11.4,   grossMargin:42.98, opMargin:27.98, activeSKUs:4,  hasPricing:true,  hasSales:true, brands:['turbo'],
+          revenue:{dec:0,      jan:63418,  feb:0},   units:{dec:0,     jan:5646,  feb:0},   momGrowth:-100.0},
+  {id:17, name:"חוות נעמי",    status:"active",      distributor:"אייסדרים",       dist_pct:15, avgPrice:35.03,  grossMargin:39.48, opMargin:24.48, activeSKUs:5,  hasPricing:true,  hasSales:true, brands:['turbo','danis'],
+          revenue:{dec:7185,   jan:17277,  feb:30748.3},
+          turboRev:{dec:5940,  jan:4329,   feb:3607.48},   danisRev:{dec:1245, jan:12948, feb:27140.82},
+          units:{dec:465, jan:484, feb:595},
+          turboUnits:{dec:450, jan:328, feb:268},       danisUnits:{dec:15, jan:156, feb:327},
+          momGrowth:22.9},
+  {id:18, name:"חממה",          status:"negotiation", distributor:"אייסדרים",       dist_pct:15, avgPrice:14.1,   grossMargin:53.9,  opMargin:38.9,  activeSKUs:4,  hasPricing:true,  hasSales:false, brands:['turbo'],
+          revenue:{dec:0, jan:0, feb:0}, units:{dec:0, jan:0, feb:0}, momGrowth:null},
+  {id:19, name:"פוט לוקר",      status:"negotiation", distributor:"אייסדרים",       dist_pct:15, avgPrice:15.5,   grossMargin:58.06, opMargin:43.06, activeSKUs:4,  hasPricing:true,  hasSales:false, brands:['turbo'],
+          revenue:{dec:0, jan:0, feb:0}, units:{dec:0, jan:0, feb:0}, momGrowth:null},
+];
+
+// Product mix per customer (total units, all months combined)
+const productMix = {
+  1:  {chocolate:11782, vanilla:11118, mango:6992, pistachio:4580},
+  2:  {chocolate:1725,  vanilla:1581,  mango:1150, pistachio:160},
+  3:  {chocolate:420,   vanilla:414,   mango:294},
+  4:  {chocolate:1829,  vanilla:1706,  mango:1278},
+  5:  {chocolate:7088,  vanilla:6823,  mango:3930, dream_cake:14983, pistachio:3371},
+  6:  {chocolate:2255,  vanilla:2156,  mango:1463},
+  7:  {chocolate:528,   vanilla:672,   mango:450,  dream_cake:407},
+  8:  {chocolate:390,   vanilla:390,   mango:240,  pistachio:30, dream_cake:45},
+  9:  {chocolate:702,   vanilla:708,   mango:564},
+  11: {chocolate:21435, vanilla:20566, mango:13213,pistachio:5697},
+  12: {chocolate:630,   vanilla:492,   mango:320,  pistachio:140},
+  13: {chocolate:5808,  vanilla:5416,  mango:3939},
+  14: {chocolate:3244,  vanilla:2949,  mango:1972},
+  15: {chocolate:620,   vanilla:646,   mango:360},
+  16: {chocolate:1980,  vanilla:1890,  mango:1776},
+  17: {chocolate:330,   vanilla:378,   mango:238,  pistachio:100, dream_cake:498},
+};
+
+// SKU price list per customer (from price DB - updated 24/2)
+const skuDetail = {
+  1: [{name:"גלידת חלבון וניל",      p0:12.23,p18:14.43,cost:6.5, gm:46.85,om:21.85,dp:25},
+      {name:"גלידת חלבון מנגו",      p0:12.23,p18:14.43,cost:6.5, gm:46.85,om:21.85,dp:25},
+      {name:"גלידת חלבון שוקולד לוז",p0:12.23,p18:14.43,cost:6.5, gm:46.85,om:21.85,dp:25},
+      {name:"גלידת חלבון פיסטוק",    p0:13.4, p18:15.81,cost:6.5, gm:51.49,om:26.49,dp:25}],
+  2: [{name:"גלידת חלבון וניל",      p0:12.23,p18:14.43,cost:6.5, gm:46.85,om:21.85,dp:25},
+      {name:"גלידת חלבון מנגו",      p0:12.23,p18:14.43,cost:6.5, gm:46.85,om:21.85,dp:25},
+      {name:"גלידת חלבון שוקולד לוז",p0:12.23,p18:14.43,cost:6.5, gm:46.85,om:21.85,dp:25},
+      {name:"גלידת חלבון פיסטוק",    p0:13.4, p18:15.81,cost:6.5, gm:51.49,om:26.49,dp:25}],
+  3: [{name:"גלידת חלבון וניל",      p0:12.66,p18:14.94,cost:6.5, gm:48.66,om:33.66,dp:15},
+      {name:"גלידת חלבון מנגו",      p0:12.66,p18:14.94,cost:6.5, gm:48.66,om:33.66,dp:15},
+      {name:"גלידת חלבון שוקולד לוז",p0:12.66,p18:14.94,cost:6.5, gm:48.66,om:33.66,dp:15},
+      {name:"גלידת חלבון פיסטוק",    p0:13.2, p18:15.58,cost:6.5, gm:50.76,om:35.76,dp:15}],
+  4: [{name:"גלידת חלבון וניל",      p0:12.74,p18:15.03,cost:6.5, gm:48.98,om:23.98,dp:25},
+      {name:"גלידת חלבון מנגו",      p0:12.74,p18:15.03,cost:6.5, gm:48.98,om:23.98,dp:25},
+      {name:"גלידת חלבון שוקולד לוז",p0:12.74,p18:15.03,cost:6.5, gm:48.98,om:23.98,dp:25},
+      {name:"גלידת חלבון פיסטוק",    p0:13.56,p18:16.0, cost:6.5, gm:52.06,om:27.06,dp:25}],
+  5: [{name:"גלידת חלבון וניל",      p0:13.8, p18:16.28,cost:6.5, gm:52.9, om:37.9, dp:15},
+      {name:"גלידת חלבון מנגו",      p0:13.8, p18:16.28,cost:6.5, gm:52.9, om:37.9, dp:15},
+      {name:"גלידת חלבון שוקולד לוז",p0:13.8, p18:16.28,cost:6.5, gm:52.9, om:37.9, dp:15},
+      {name:"גלידת חלבון פיסטוק",    p0:13.8, p18:16.28,cost:6.5, gm:52.9, om:37.9, dp:15},
+      {name:"דרים קייק",             p0:81.1, p18:95.7, cost:53.5, gm:34.03,om:19.03,dp:15},
+      {name:"מארז שלישיית גלידות",   p0:35.0, p18:41.3, cost:22.5, gm:35.71,om:20.71,dp:15}],
+  6: [{name:"גלידת חלבון וניל",      p0:14.2, p18:16.76,cost:6.5, gm:54.23,om:29.23,dp:25},
+      {name:"גלידת חלבון מנגו",      p0:14.2, p18:16.76,cost:6.5, gm:54.23,om:29.23,dp:25},
+      {name:"גלידת חלבון שוקולד לוז",p0:14.2, p18:16.76,cost:6.5, gm:54.23,om:29.23,dp:25},
+      {name:"גלידת חלבון פיסטוק",    p0:14.2, p18:16.76,cost:6.5, gm:54.23,om:29.23,dp:25}],
+  7: [{name:"גלידת חלבון וניל",      p0:13.5, p18:15.93,cost:6.5, gm:51.85,om:36.85,dp:15},
+      {name:"גלידת חלבון מנגו",      p0:13.5, p18:15.93,cost:6.5, gm:51.85,om:36.85,dp:15},
+      {name:"גלידת חלבון שוקולד לוז",p0:13.5, p18:15.93,cost:6.5, gm:51.85,om:36.85,dp:15},
+      {name:"גלידת חלבון פיסטוק",    p0:13.9, p18:16.4, cost:6.5, gm:53.24,om:38.24,dp:15},
+      {name:"דרים קייק",             p0:81.2, p18:95.82,cost:53.5, gm:34.11,om:19.11,dp:15},
+      {name:"מארז שלישיית גלידות",   p0:34.0, p18:40.12,cost:22.5, gm:33.82,om:18.82,dp:15}],
+  8: [{name:"גלידת חלבון וניל",      p0:14.0, p18:16.52,cost:6.5, gm:53.57,om:38.57,dp:15},
+      {name:"גלידת חלבון מנגו",      p0:14.0, p18:16.52,cost:6.5, gm:53.57,om:38.57,dp:15},
+      {name:"גלידת חלבון שוקולד לוז",p0:14.0, p18:16.52,cost:6.5, gm:53.57,om:38.57,dp:15},
+      {name:"גלידת חלבון פיסטוק",    p0:14.0, p18:16.52,cost:6.5, gm:53.57,om:38.57,dp:15},
+      {name:"דרים קייק",             p0:89.0, p18:105.02,cost:53.5,gm:39.89,om:24.89,dp:15},
+      {name:"מארז שלישיית גלידות",   p0:36.0, p18:42.48,cost:22.5, gm:37.5, om:22.5, dp:15}],
+  9: [{name:"גלידת חלבון וניל",      p0:13.1, p18:15.46,cost:6.5, gm:50.38,om:35.38,dp:15},
+      {name:"גלידת חלבון מנגו",      p0:13.1, p18:15.46,cost:6.5, gm:50.38,om:35.38,dp:15},
+      {name:"גלידת חלבון שוקולד לוז",p0:13.1, p18:15.46,cost:6.5, gm:50.38,om:35.38,dp:15},
+      {name:"גלידת חלבון פיסטוק",    p0:13.9, p18:16.4, cost:6.5, gm:53.24,om:38.24,dp:15},
+      {name:"מארז שלישיית גלידות",   p0:34.0, p18:40.12,cost:22.5, gm:33.82,om:18.82,dp:15}],
+  10:[{name:"גלידת חלבון וניל",      p0:13.8, p18:16.28,cost:6.5, gm:52.9, om:27.9, dp:25},
+      {name:"גלידת חלבון מנגו",      p0:13.8, p18:16.28,cost:6.5, gm:52.9, om:27.9, dp:25},
+      {name:"גלידת חלבון שוקולד לוז",p0:13.8, p18:16.28,cost:6.5, gm:52.9, om:27.9, dp:25}],
+  11:[{name:"גלידת חלבון וניל",      p0:14.1, p18:16.64,cost:6.5, gm:53.9, om:28.9, dp:25},
+      {name:"גלידת חלבון מנגו",      p0:14.1, p18:16.64,cost:6.5, gm:53.9, om:28.9, dp:25},
+      {name:"גלידת חלבון שוקולד לוז",p0:14.1, p18:16.64,cost:6.5, gm:53.9, om:28.9, dp:25},
+      {name:"גלידת חלבון פיסטוק",    p0:14.1, p18:16.64,cost:6.5, gm:53.9, om:28.9, dp:25}],
+  13:[{name:"גלידת חלבון וניל",      p0:11.0, p18:12.98,cost:6.5, gm:40.91,om:15.91,dp:25},
+      {name:"גלידת חלבון מנגו",      p0:11.0, p18:12.98,cost:6.5, gm:40.91,om:15.91,dp:25},
+      {name:"גלידת חלבון שוקולד לוז",p0:11.0, p18:12.98,cost:6.5, gm:40.91,om:15.91,dp:25}],
+  14:[{name:"גלידת חלבון וניל",      p0:11.0, p18:12.98,cost:6.5, gm:40.91,om:15.91,dp:25},
+      {name:"גלידת חלבון מנגו",      p0:11.0, p18:12.98,cost:6.5, gm:40.91,om:15.91,dp:25},
+      {name:"גלידת חלבון שוקולד לוז",p0:11.0, p18:12.98,cost:6.5, gm:40.91,om:15.91,dp:25}],
+  15:[{name:"גלידת חלבון וניל",      p0:14.0, p18:16.52,cost:6.5, gm:53.57,om:28.57,dp:25},
+      {name:"גלידת חלבון מנגו",      p0:14.0, p18:16.52,cost:6.5, gm:53.57,om:28.57,dp:25},
+      {name:"גלידת חלבון שוקולד לוז",p0:14.0, p18:16.52,cost:6.5, gm:53.57,om:28.57,dp:25}],
+  16:[{name:"גלידת חלבון וניל",      p0:11.4, p18:13.45,cost:6.5, gm:42.98,om:27.98,dp:15},
+      {name:"גלידת חלבון מנגו",      p0:11.4, p18:13.45,cost:6.5, gm:42.98,om:27.98,dp:15},
+      {name:"גלידת חלבון שוקולד לוז",p0:11.4, p18:13.45,cost:6.5, gm:42.98,om:27.98,dp:15},
+      {name:"גלידת חלבון פיסטוק",    p0:12.3, p18:14.51,cost:6.5, gm:47.15,om:32.15,dp:15}],
+  17:[{name:"גלידת חלבון וניל",      p0:13.2, p18:15.58,cost:6.5, gm:50.76,om:35.76,dp:15},
+      {name:"גלידת חלבון מנגו",      p0:13.2, p18:15.58,cost:6.5, gm:50.76,om:35.76,dp:15},
+      {name:"גלידת חלבון שוקולד לוז",p0:13.2, p18:15.58,cost:6.5, gm:50.76,om:35.76,dp:15},
+      {name:"גלידת חלבון פיסטוק",    p0:13.9, p18:16.4, cost:6.5, gm:53.24,om:38.24,dp:15},
+      {name:"דרים קייק",             p0:83.0, p18:97.94,cost:53.5, gm:35.54,om:20.54,dp:15}],
+  18:[{name:"גלידת חלבון וניל",      p0:14.1, p18:16.64,cost:6.5, gm:53.9, om:38.9, dp:15},
+      {name:"גלידת חלבון מנגו",      p0:14.1, p18:16.64,cost:6.5, gm:53.9, om:38.9, dp:15},
+      {name:"גלידת חלבון שוקולד לוז",p0:14.1, p18:16.64,cost:6.5, gm:53.9, om:38.9, dp:15},
+      {name:"גלידת חלבון פיסטוק",    p0:14.1, p18:16.64,cost:6.5, gm:53.9, om:38.9, dp:15}],
+  19:[{name:"גלידת חלבון וניל",      p0:15.5, p18:18.29,cost:6.5, gm:58.06,om:43.06,dp:15},
+      {name:"גלידת חלבון מנגו",      p0:15.5, p18:18.29,cost:6.5, gm:58.06,om:43.06,dp:15},
+      {name:"גלידת חלבון שוקולד לוז",p0:15.5, p18:18.29,cost:6.5, gm:58.06,om:43.06,dp:15},
+      {name:"גלידת חלבון פיסטוק",    p0:15.5, p18:18.29,cost:6.5, gm:58.06,om:43.06,dp:15}],
+};
+
+const PROD_COLORS = {
+  chocolate:'rgba(139,69,19,0.85)', vanilla:'rgba(245,158,11,0.85)',
+  mango:'rgba(249,115,22,0.85)', pistachio:'rgba(147,197,114,0.85)',
+  dream_cake:'rgba(219,112,147,0.85)', magadat:'rgba(168,85,247,0.85)',
+};
+const PROD_LABELS = {
+  chocolate:'Chocolate', vanilla:'Vanilla', mango:'Mango',
+  pistachio:'Pistachio', dream_cake:'Dream Cake', magadat:'Triple Pack',
+};
+const PROD_KEY = {
+  'גלידת חלבון וניל':'vanilla','גלידת חלבון מנגו':'mango',
+  'גלידת חלבון שוקולד לוז':'chocolate','גלידת חלבון פיסטוק':'pistachio',
+  'דרים קייק':'dream_cake','מארז שלישיית גלידות':'magadat',
+};
+const PROD_NAMES = {
+  vanilla:'גלידת חלבון וניל',mango:'גלידת חלבון מנגו',
+  chocolate:'גלידת חלבון שוקולד לוז',pistachio:'גלידת חלבון פיסטוק',
+  dream_cake:'דרים קייק',magadat:'מארז שלישיית גלידות',
+};
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+const S = {
+  cust:'all', dist:'all', status:'all', month:'jan', brand:'all',
+  sortCol:'revActive', sortDir:-1, selId:null,
+  paretoMode:'revenue', trendMode:'rev'
+};
+let charts = {};
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const sel = document.getElementById('f-cust');
+  customers.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id; o.textContent = c.name; sel.appendChild(o);
+  });
+  renderAll();
+});
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+// Inline data-labels plugin — no external CDN needed
+Chart.register({
+  id:'datalabels',
+  afterDraw(chart){
+    try {
+      const cfg=chart.options&&chart.options.plugins&&chart.options.plugins.datalabels;
+      if(!cfg) return;
+      const canvasCtx=chart.ctx;
+      const fSize=(cfg.font&&cfg.font.size)||10;
+      const fWeight=(cfg.font&&cfg.font.weight)||'normal';
+      const offset=cfg.offset||4;
+      const align=cfg.align||'top';
+      chart.data.datasets.forEach(function(ds,di){
+        try {
+          var meta=chart.getDatasetMeta(di);
+          if(!meta||meta.hidden) return;
+          var pts=meta.data;
+          if(!pts||!pts.length) return;
+          canvasCtx.save();
+          canvasCtx.font=fWeight+' '+fSize+'px sans-serif';
+          canvasCtx.textAlign='center';
+          for(var idx=0;idx<pts.length;idx++){
+            var raw=ds.data[idx];
+            if(raw===null||raw===undefined) continue;
+            var el=pts[idx];
+            if(!el||el.x==null||el.y==null) continue;
+            // display check
+            if(typeof cfg.display==='function'){
+              if(!cfg.display({dataset:ds,dataIndex:idx,datasetIndex:di})) continue;
+            } else if(cfg.display===false) continue;
+            // color
+            var fillColor=typeof cfg.color==='function'
+              ?cfg.color({dataset:ds,dataIndex:idx,datasetIndex:di})
+              :(cfg.color||'#8892a4');
+            canvasCtx.fillStyle=fillColor;
+            // label
+            var label=raw;
+            if(typeof cfg.formatter==='function'){
+              label=cfg.formatter(raw,{dataset:ds,dataIndex:idx,datasetIndex:di});
+            }
+            if(label===null||label===undefined||label==='') continue;
+            // position
+            var lx=el.x, ly;
+            if(align==='center'&&el.base!=null){
+              ly=el.y+(el.base-el.y)/2;
+              canvasCtx.textBaseline='middle';
+            } else {
+              ly=el.y-offset;
+              canvasCtx.textBaseline='bottom';
+            }
+            canvasCtx.fillText(String(label),lx,ly);
+          }
+          canvasCtx.restore();
+        } catch(e2){}
+      });
+    } catch(e){}
+  }
+});
+const N = (v,d=0) => v==null?'—':v.toLocaleString('he-IL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const P = v => v==null?'—':v.toFixed(1)+'%';
+const colorGM = g => g==null?'var(--text2)':g>=50?'var(--green)':g>=40?'var(--amber)':'var(--red)';
+const colorOM = g => g==null?'var(--text2)':g>=30?'var(--green)':g>=20?'var(--amber)':'var(--red)';
+
+function getBrandRev(c){
+  if(S.brand==='turbo' && c.turboRev) return c.turboRev;
+  if(S.brand==='danis' && c.danisRev) return c.danisRev;
+  return c.revenue;
+}
+function getBrandUnits(c){
+  if(S.brand==='turbo' && c.turboUnits) return c.turboUnits;
+  if(S.brand==='danis' && c.danisUnits) return c.danisUnits;
+  return c.units;
+}
+function getRevField(c){
+  const r=getBrandRev(c);
+  return S.month==='dec'?r.dec:S.month==='feb'?r.feb:S.month==='total'?(r.dec+r.jan+r.feb):r.jan;
+}
+function getUnitField(c){
+  const u=getBrandUnits(c);
+  return S.month==='dec'?u.dec:S.month==='feb'?u.feb:S.month==='total'?(u.dec+u.jan+u.feb):u.jan;
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────────
+function filtered(){
+  return customers.filter(c=>{
+    if(S.cust!=='all' && c.id!=S.cust) return false;
+    if(S.dist==='אייסדרים' && c.distributor!=='אייסדרים') return false;
+    if(S.dist==='מעיין' && c.distributor!=='מעיין נציגויות') return false;
+    if(S.dist==='none' && c.hasPricing) return false;
+    if(S.status!=='all' && c.status!==S.status) return false;
+    if(S.brand!=='all' && !c.brands.includes(S.brand)) return false;
+    return true;
+  });
+}
+
+function portfolioMonthly(list){
+  const src=list||filtered();
+  return ['dec','jan','feb'].map((m,i)=>{
+    let rev=0,units=0;
+    src.forEach(c=>{
+      const r=getBrandRev(c); const u=getBrandUnits(c);
+      rev+=r[m]||0; units+=u[m]||0;
+    });
+    return {month:["Dec '25","Jan '26","Feb '26"][i],revenue:rev,units};
+  });
+}
+
+function applyFilters(){
+  S.cust  = document.getElementById('f-cust').value;
+  S.dist  = document.getElementById('f-dist').value;
+  S.status= document.getElementById('f-status').value;
+  S.month = document.getElementById('f-month').value;
+  updateChips(); renderAll();
+}
+function resetFilters(){
+  ['f-cust','f-dist','f-status'].forEach(id=>document.getElementById(id).value='all');
+  document.getElementById('f-month').value='jan';
+  setBrand('all');
+  S.cust='all';S.dist='all';S.status='all';S.month='jan';S.brand='all';
+  updateChips(); renderAll();
+}
+function setBrand(b){
+  S.brand=b;
+  ['all','turbo','danis'].forEach(x=>{
+    const el=document.getElementById('bb-'+x);
+    el.className='tab'+(x===b?(b==='all'?' on':b==='turbo'?' on-turbo':' on-danis'):'');
+  });
+  renderAll();
+}
+function updateChips(){
+  const chips=[];
+  if(S.cust!=='all'){const c=customers.find(x=>x.id==S.cust);if(c)chips.push(['Customer',c.name,'cust']);}
+  if(S.dist!=='all') chips.push(['Dist',S.dist,'dist']);
+  if(S.status!=='all') chips.push(['Status',S.status,'status']);
+  document.getElementById('chips').innerHTML=chips.map(([l,v,k])=>
+    `<div class="chip">${l}: ${v} <button onclick="clearChip('${k}')">×</button></div>`
+  ).join('');
+}
+function clearChip(k){
+  document.getElementById('f-'+k).value='all';
+  S[k]='all'; updateChips(); renderAll();
+}
+function sortBy(col){
+  if(S.sortCol===col) S.sortDir*=-1; else{S.sortCol=col;S.sortDir=-1;}
+  renderTable();
+}
+function setParetoMode(m){
+  S.paretoMode=m;
+  document.getElementById('pb-rev').className='tab'+(m==='revenue'?' on':'');
+  document.getElementById('pb-u').className='tab'+(m==='units'?' on':'');
+  renderPareto();
+}
+function setTrendMode(m){
+  S.trendMode=m;
+  document.getElementById('tb-r').className='tab'+(m==='rev'?' on':'');
+  document.getElementById('tb-u').className='tab'+(m==='units'?' on':'');
+  renderTrend();
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
+function renderAll(){
+  renderKPIs(); renderPareto(); renderScatter(); renderMix(); renderTrend(); renderTable(); renderWeeklyChart();
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────────
+function renderKPIs(){
+  const list=filtered();
+  const totals=portfolioMonthly(list);
+  const mIdx={dec:0,jan:1,feb:2}[S.month];
+  const mLbl={dec:"Dec '25",jan:"Jan '26",feb:"Feb '26",total:"All Months"}[S.month];
+  const curRev  =mIdx!=null?totals[mIdx].revenue :totals.reduce((s,t)=>s+t.revenue,0);
+  const curUnits=mIdx!=null?totals[mIdx].units   :totals.reduce((s,t)=>s+t.units,0);
+  const grossVal=list.reduce((s,c)=>s+(getRevField(c)*(c.grossMargin||0)/100),0);
+  const opVal   =list.reduce((s,c)=>s+(getRevField(c)*(c.opMargin||0)/100),0);
+  const withSales=list.filter(c=>getRevField(c)>0).length;
+  // MoM (jan vs dec for jan, feb vs jan for feb)
+  let momRev=null;
+  if(S.month==='jan'&&totals[0].revenue>0) momRev=((totals[1].revenue-totals[0].revenue)/totals[0].revenue*100);
+  if(S.month==='feb'&&totals[1].revenue>0) momRev=((totals[2].revenue-totals[1].revenue)/totals[1].revenue*100);
+  const momHtml=momRev!=null?`<span class="${momRev>=0?'up':'down'}">${momRev>=0?'▲':'▼'}${Math.abs(momRev).toFixed(1)}% vs prev month</span>`:'—';
+
+  const avgGM=list.filter(c=>c.grossMargin!=null&&getRevField(c)>0).reduce((a,c,_,ar)=>{
+    const w=getRevField(c); return {sum:a.sum+c.grossMargin*w,w:a.w+w};
+  },{sum:0,w:0});
+  const avgGMval=avgGM.w>0?(avgGM.sum/avgGM.w).toFixed(1):'—';
+
+  document.getElementById('kpi-grid').innerHTML=`
+  <div class="kpi-card"><div class="kpi-label">Revenue (${mLbl})</div><div class="kpi-value">₪${N(curRev)}</div><div class="kpi-meta">${momHtml}</div></div>
+  <div class="kpi-card"><div class="kpi-label">Units (${mLbl})</div><div class="kpi-value">${N(curUnits)}</div><div class="kpi-meta">${withSales} customers w/ sales</div></div>
+  <div class="kpi-card"><div class="kpi-label">Gross Profit ₪</div><div class="kpi-value" style="color:var(--green)">₪${N(grossVal)}</div><div class="kpi-meta">Avg Gross: ${avgGMval}%</div></div>
+  <div class="kpi-card"><div class="kpi-label">Op Profit ₪</div><div class="kpi-value" style="color:var(--accent)">₪${N(opVal)}</div><div class="kpi-meta">After dist. costs</div></div>
+  <div class="kpi-card"><div class="kpi-label">Customers w/ Sales</div><div class="kpi-value">${withSales}</div><div class="kpi-meta">of ${list.length} in filter</div></div>
+  <div class="kpi-card"><div class="kpi-label">Portfolio Dec→Jan</div><div class="kpi-value">${momRev!=null&&S.month==='jan'?`<span class="${momRev>=0?'up':'down'}">${momRev>=0?'+':''}${momRev.toFixed(1)}%</span>`:'—'}</div><div class="kpi-meta">Revenue MoM change</div></div>`;
+}
+
+// ── PARETO ────────────────────────────────────────────────────────────────────
+function renderPareto(){
+  const list=filtered().filter(c=>getRevField(c)>0||getUnitField(c)>0);
+  const key=S.paretoMode==='revenue'?'rev':'u';
+  const vals=list.map(c=>({name:c.name,v:S.paretoMode==='revenue'?getRevField(c):getUnitField(c),gm:c.grossMargin,id:c.id}));
+  vals.sort((a,b)=>b.v-a.v);
+  const bgColors=vals.map(x=>x.gm==null?'rgba(136,146,164,0.6)':x.gm>=50?'rgba(34,197,94,0.7)':x.gm>=40?'rgba(245,158,11,0.7)':'rgba(239,68,68,0.7)');
+  const ctx=document.getElementById('c-pareto').getContext('2d');
+  if(charts.pareto) charts.pareto.destroy();
+  charts.pareto=new Chart(ctx,{type:'bar',data:{labels:vals.map(v=>v.name),datasets:[{data:vals.map(v=>v.v),backgroundColor:bgColors,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return (S.paretoMode==='revenue'?'NIS ':'')+N(c.raw);}}},
+    datalabels:{anchor:'end',align:'end',color:'#8892a4',font:{size:9},formatter:function(v){return N(v);}}},
+    scales:{x:{ticks:{color:'#8892a4',font:{size:10}},grid:{display:false}},y:{min:0,ticks:{color:'#8892a4',font:{size:10}},grid:{color:'rgba(46,51,72,0.4)'},suggestedMax:vals.length?vals[0].v*1.15:100}},
+    onClick:function(_,els){if(els.length>0){const c=vals[els[0].index];S.selId=c.id;renderTable();openDrawer(customers.find(x=>x.id===c.id));}}}});
+}
+
+// ── SCATTER ───────────────────────────────────────────────────────────────────
+function renderScatter(){
+  const list=filtered().filter(c=>c.hasSales&&c.momGrowth!=null&&getRevField(c)>0);
+  const revs=list.map(c=>getRevField(c));
+  const medRev=revs.slice().sort((a,b)=>a-b)[Math.floor(revs.length/2)]||1;
+  const data=list.map(c=>({x:getRevField(c),y:c.momGrowth,r:Math.max(5,Math.sqrt(getUnitField(c)/15)),label:c.name}));
+  const ctx=document.getElementById('c-scatter').getContext('2d');
+  if(charts.scatter) charts.scatter.destroy();
+  charts.scatter=new Chart(ctx,{type:'bubble',data:{datasets:[{data,backgroundColor:'rgba(79,142,247,0.55)',borderColor:'rgba(79,142,247,0.9)',borderWidth:1}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw.label+': '+N(c.raw.x)+' | MoM '+(c.raw.y>0?'+':'')+c.raw.y.toFixed(1)+'%';}}},
+    datalabels:{anchor:'center',align:'top',offset:4,color:'#b0bac9',font:{size:8},formatter:function(v){return v&&v.label?v.label:null;}}},
+    scales:{x:{ticks:{color:'#8892a4',font:{size:10},callback:function(v){return N(v);}},grid:{color:'rgba(46,51,72,0.4)'}},y:{ticks:{color:'#8892a4',font:{size:10},callback:function(v){return v+'%';}},grid:{color:'rgba(46,51,72,0.4)'},title:{display:true,text:'MoM Growth %',color:'#8892a4',font:{size:10}}}}}});
+}
+
+// ── MIX ───────────────────────────────────────────────────────────────────────
+function renderMix(){
+  const list=filtered().filter(c=>productMix[c.id]);
+  const agg={};
+  list.forEach(c=>{Object.entries(productMix[c.id]).forEach(([k,v])=>{agg[k]=(agg[k]||0)+v;});});
+  const labels=Object.keys(agg).map(k=>PROD_LABELS[k]||k);
+  const vals=Object.values(agg);
+  const colors=Object.keys(agg).map(k=>PROD_COLORS[k]||'rgba(136,146,164,0.7)');
+  const ctx=document.getElementById('c-mix').getContext('2d');
+  if(charts.mix) charts.mix.destroy();
+  charts.mix=new Chart(ctx,{type:'bar',data:{labels:list.map(c=>c.name),
+    datasets:Object.keys(agg).map(k=>({label:PROD_LABELS[k]||k,data:list.map(c=>(productMix[c.id]||{})[k]||0),backgroundColor:PROD_COLORS[k]||'rgba(136,146,164,0.7)',stack:'s'}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8892a4',font:{size:10},boxWidth:10}},
+    datalabels:{anchor:'center',align:'center',color:'#fff',font:{size:8},display:function(c){return c.dataset.data[c.dataIndex]>0;},formatter:function(v){return v>0?N(v):'';}}},
+    scales:{x:{stacked:true,ticks:{color:'#8892a4',font:{size:10}},grid:{display:false}},y:{stacked:true,ticks:{color:'#8892a4',font:{size:10}},grid:{color:'rgba(46,51,72,0.4)'},grace:'10%'}}}});
+}
+
+// ── TREND ─────────────────────────────────────────────────────────────────────
+function renderTrend(){
+  const pm=portfolioMonthly();
+  const isRev=S.trendMode==='rev';
+  const vals=pm.map(p=>isRev?p.revenue:p.units);
+  const ctx=document.getElementById('c-trend').getContext('2d');
+  if(charts.trend) charts.trend.destroy();
+  charts.trend=new Chart(ctx,{type:'line',data:{labels:pm.map(p=>p.month),datasets:[{data:vals,borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,0.1)',fill:true,tension:0.3,pointRadius:5,pointBackgroundColor:'#4f8ef7'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return N(c.raw);}}},
+    datalabels:{anchor:'end',align:'top',offset:6,color:'#b0bac9',font:{size:11,weight:'600'},formatter:function(v){return N(v);}}},
+    scales:{x:{ticks:{color:'#8892a4',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#8892a4',font:{size:10},callback:function(v){return N(v);}},grid:{color:'rgba(46,51,72,0.4)'}}}}});
+}
+
+// ── TABLE ─────────────────────────────────────────────────────────────────────
+function renderTable(){
+  const q=(document.getElementById('t-search').value||'').toLowerCase();
+  const base=filtered().filter(c=>!q||c.name.toLowerCase().includes(q)||c.distributor.toLowerCase().includes(q));
+  const totalRev=base.reduce((s,c)=>s+getRevField(c),0);
+  const withMeta=base.map(c=>({...c,
+    _rev:getRevField(c),_units:getUnitField(c),
+    _grossVal:c.grossMargin!=null?getRevField(c)*(c.grossMargin/100):-Infinity,
+    _opVal:c.opMargin!=null?getRevField(c)*(c.opMargin/100):-Infinity,
+  }));
+  // Sort: active rows first, then by sort column
+  const activeRows=withMeta.filter(c=>c._rev>0);
+  const zeroRows =withMeta.filter(c=>c._rev===0);
+  const getSortVal=(c,col)=>{
+    if(col==='revActive') return c._rev;
+    if(col==='unitsActive') return c._units;
+    if(col==='share') return totalRev>0?c._rev/totalRev:0;
+    if(col==='grossVal') return c._grossVal;
+    if(col==='opVal') return c._opVal;
+    if(col==='name') return c.name;
+    if(col==='distributor') return c.distributor;
+    if(col==='status') return c.status;
+    return c[col]??-Infinity;
+  };
+  const sortFn=(a,b)=>{
+    const av=getSortVal(a,S.sortCol), bv=getSortVal(b,S.sortCol);
+    if(typeof av==='string') return S.sortDir*(av<bv?-1:av>bv?1:0);
+    return S.sortDir*(av-bv);
+  };
+  activeRows.sort(sortFn);
+
+  const mLbl={dec:"Dec",jan:"Jan",feb:"Feb",total:"Total"}[S.month];
+  const rows=[...activeRows,...zeroRows].map(c=>{
+    const rev=c._rev, units=c._units;
+    const share=totalRev>0?(rev/totalRev*100):0;
+    const grossVal=c.grossMargin!=null?rev*(c.grossMargin/100):null;
+    const opVal=c.opMargin!=null?rev*(c.opMargin/100):null;
+    const gmCol=colorGM(c.grossMargin), omCol=colorOM(c.opMargin);
+    const isZero=rev===0;
+    const zeroReason=isZero?(c.status==='negotiation'?'negotiation — no sales yet':`no sales in ${mLbl}`):'';
+    const statusHtml=c.status==='active'?'<span class="dtag active">Active</span>':'<span class="dtag negotiation">Negotiation</span>';
+    const brandHtml=c.brands.map(b=>b==='turbo'?'<span class="brand-tag brand-turbo">Turbo</span>':'<span class="brand-tag brand-danis">Dani\'s</span>').join('');
+    return `<tr class="${c.id===S.selId?'sel':''}" onclick="selectRow(${c.id})" style="${isZero?'opacity:0.5':''}">
+      <td><strong>${c.name}</strong>${brandHtml}${isZero?`<br><span style="font-size:10px;color:var(--text2)">${zeroReason}</span>`:''}</td>
+      <td><strong>${rev>0?'₪'+N(rev):'—'}</strong></td>
+      <td style="color:var(--text2)">${rev>0?'₪'+N(rev*1.18):'—'}</td>
+      <td><div class="pct-bar"><div class="bar-bg"><div class="bar-fg" style="width:${Math.min(100,share).toFixed(0)}%;background:var(--accent)"></div></div>${share>0?share.toFixed(1)+'%':'—'}</div></td>
+      <td style="color:${gmCol};font-weight:600">${P(c.grossMargin)}</td>
+      <td style="color:${gmCol};font-weight:600">${grossVal!=null?'₪'+N(grossVal):'—'}</td>
+      <td style="color:${omCol};font-weight:600">${P(c.opMargin)}</td>
+      <td style="color:${omCol};font-weight:600">${opVal!=null?'₪'+N(opVal):'—'}</td>
+      <td>${units>0?N(units):'—'}</td>
+      <td>${c.momGrowth!=null?`<span class="${c.momGrowth>=0?'up':'down'}">${c.momGrowth>=0?'▲':'▼'}${Math.abs(c.momGrowth).toFixed(1)}%</span>`:'—'}</td>
+      <td style="color:var(--text2);font-size:11px">${c.distributor}</td>
+      <td>${statusHtml}</td>
+    </tr>`;
+  });
+  document.getElementById('t-body').innerHTML=rows.join('');
+}
+
+function selectRow(id){
+  const c=customers.find(x=>x.id===id);
+  if(!c) return;
+  if(S.selId===id){S.selId=null;closeDrawer();}
+  else{S.selId=id;openDrawer(c);}
+  renderTable();
+}
+
+// ── DRAWER ────────────────────────────────────────────────────────────────────
+function openDrawer(c){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('d-name').textContent=c.name;
+  const statusHtml=c.status==='active'?'<span class="dtag active">Active</span>':'<span class="dtag negotiation">Negotiation</span>';
+  const brandHtml=c.brands.map(b=>b==='turbo'?'<span class="brand-tag brand-turbo">Turbo</span>':'<span class="brand-tag brand-danis">Dani\'s</span>').join('');
+  document.getElementById('d-tag-row').innerHTML=statusHtml+brandHtml+`<span style="font-size:11px;color:var(--text2);margin-left:8px">${c.distributor} · ${c.dist_pct}% dist</span>`;
+
+  const revTotal=c.revenue.dec+c.revenue.jan+c.revenue.feb;
+  const unitsTotal=c.units.dec+c.units.jan+c.units.feb;
+  const gmCol=colorGM(c.grossMargin), omCol=colorOM(c.opMargin);
+  document.getElementById('d-kpis').innerHTML=`
+    <div class="dkpi"><div class="dkpi-l">Total Revenue (3M)</div><div class="dkpi-v">₪${N(revTotal)}</div></div>
+    <div class="dkpi"><div class="dkpi-l">Avg Price (VAT0)</div><div class="dkpi-v">${c.avgPrice!=null?'₪'+c.avgPrice.toFixed(2):'—'}</div></div>
+    <div class="dkpi"><div class="dkpi-l">Gross Margin</div><div class="dkpi-v" style="color:${gmCol}">${P(c.grossMargin)}</div></div>
+    <div class="dkpi"><div class="dkpi-l">Op Margin</div><div class="dkpi-v" style="color:${omCol}">${P(c.opMargin)}</div></div>
+    <div class="dkpi"><div class="dkpi-l">Total Units (3M)</div><div class="dkpi-v">${N(unitsTotal)}</div></div>
+    <div class="dkpi"><div class="dkpi-l">Active SKUs</div><div class="dkpi-v">${c.activeSKUs}</div></div>`;
+
+  // Monthly chart
+  const ctx=document.getElementById('d-chart').getContext('2d');
+  if(charts.drawer) charts.drawer.destroy();
+  const months=["Dec '25","Jan '26","Feb '26"];
+  const revData=[c.revenue.dec,c.revenue.jan,c.revenue.feb];
+  charts.drawer=new Chart(ctx,{type:'bar',data:{labels:months,datasets:[{data:revData,backgroundColor:['rgba(79,142,247,0.6)','rgba(79,142,247,0.9)','rgba(79,142,247,0.5)'],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return N(c.raw);}}},
+    datalabels:{anchor:'end',align:'end',color:'#b0bac9',font:{size:11,weight:'600'},formatter:function(v){return v>0?N(v):'';}}},
+    scales:{x:{ticks:{color:'#8892a4',font:{size:10}},grid:{display:false}},y:{min:0,ticks:{color:'#8892a4',font:{size:10},callback:function(v){return N(v);}},grid:{color:'rgba(46,51,72,0.35)'}}}}});
+
+  // SKU table: merge priced SKUs + unpriced from productMix
+  const skus=skuDetail[c.id]||[];
+  const mix=productMix[c.id]||null;
+  const totU=mix?Object.values(mix).reduce((s,v)=>s+v,0):0;
+  const pricedNames=new Set(skus.map(s=>PROD_KEY[s.name]||s.name));
+
+  const pricedRows=skus.map(s=>{
+    const k=PROD_KEY[s.name]||s.name;
+    const u=mix&&mix[k]!=null?mix[k]:null;
+    const uCell=u!=null&&totU>0?`<span style="color:var(--text2);font-size:10px">${N(u)}u · ${(u/totU*100).toFixed(0)}%</span>`:'<span>—</span>';
+    const gmCol2=colorGM(s.gm), omCol2=colorOM(s.om);
+    return `<tr>
+      <td>${s.name}<br>${uCell}</td>
+      <td>₪${s.p0}</td><td>₪${s.p18}</td>
+      <td>${s.cost!=null?'₪'+s.cost:'—'}</td>
+      <td style="color:${gmCol2}">${s.gm!=null?s.gm.toFixed(1)+'%':'—'}</td>
+      <td style="color:${omCol2}">${s.om!=null?s.om.toFixed(1)+'%':'—'}</td>
+      <td>${s.dp}%</td>
+    </tr>`;
+  });
+
+  let unpricedRows=[];
+  if(mix){
+    unpricedRows=Object.entries(mix).filter(([k])=>!pricedNames.has(k)&&mix[k]>0).map(([k,v])=>`
+      <tr style="opacity:0.7">
+        <td>${PROD_NAMES[k]||k} <span style="color:var(--amber);font-size:10px">★ no price</span><br>
+        <span style="color:var(--text2);font-size:10px">${N(v)}u · ${totU>0?(v/totU*100).toFixed(0):'?'}%</span></td>
+        <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>${c.dist_pct}%</td>
+      </tr>`);
+  }
+
+  if(pricedRows.length===0&&unpricedRows.length===0){
+    document.getElementById('d-sku-sec').textContent='SKU Data';
+    document.getElementById('d-skus').innerHTML='<tr><td colspan="7" style="color:var(--text2);font-size:11px;padding:12px">No Product Data</td></tr>';
+  } else {
+    document.getElementById('d-sku-sec').textContent=`SKU Price List (${c.dist_pct}% Dist)`;
+    document.getElementById('d-skus').innerHTML=[...pricedRows,...unpricedRows].join('');
+  }
+}
+
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  S.selId=null;
+  renderTable();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WEEKLY SALES TREND CHART
+// ══════════════════════════════════════════════════════════════════════════════
+// X-axis: 11 positions
+//   0 = "דצ'25"  (Dec 2025 — monthly total, displayed as dot)
+//   1 = "ינ'26"  (Jan 2026 — monthly total, displayed as dot)
+//   2–10 = "ש'1"–"ש'9"  (weekly, 2026)
+// Source: icedream_weekly_sales.xls  +  CP tab monthly totals  +  maay_feb_full.xlsx
+const weeklyXLabels = ["28/12","4/1","11/1","18/1","25/1","1/2","8/2","15/2","22/2"];
+
+// Icedreams monthly totals (Dec & Jan) — from Customer Performance tab, distributor=Icedreams
+// Customers: גוד פארם, וולט מרקט, ינגו דלי, כרמלה, נוי השדה, דומינוס, חוות נעמי, עוגיפלצת
+const _iceMonRev   = { dec: 686481,  jan: 641087  };
+const _iceMonUnits = { dec: 20289,   jan: 17919   };
+
+// Mayyan monthly totals (Dec & Jan) — from CP tab, distributor=מעיין
+// Customers: AMPM, אלונית, דלק, טיב טעם, שוק פרטי, פז יילו, פז סופר יודה, סונול
+const _maayMonRev   = { dec: 852496,  jan: 415214  };
+const _maayMonUnits = { dec: 61775,   jan: 30088   };
+
+// Icedreams weekly (weeks 1–9) — from icedream_weekly_sales.xls, per-product rows
+// Raito products only (באגסו / דובאי excluded). Units = cartons × UPC.
+// GROSS deliveries only (returns excluded). Fixed RK decoder (float byte-order + MULRK offset).
+// Danis revenue validated exactly. Yingo W2 validated by user.
+// Combined (Turbo + Danis)
+const _iceWkRev        = [9256, 10076, 1460, 8070, 599111, 17666, 2673, 2916, 437981];
+const _iceWkUnits      = [144, 324, 108, 66, 17068, 483, 198, 216, 12290];
+// Turbo (ice cream) only
+const _iceWkRevTurbo   = [497, 3776, 1460, 0, 143429, 5416, 2673, 2916, 112840];
+const _iceWkUnitsTurbo = [36, 282, 108, 0, 11537, 400, 198, 216, 8290];
+// Danis (dream cake) only — validated exact match all 9 weeks
+const _iceWkRevDanis   = [8759, 6300, 0, 8070, 455682, 12249, 0, 0, 325141];
+const _iceWkUnitsDanis = [108, 42, 0, 66, 5531, 83, 0, 0, 4000];
+// Returns tracked separately (for future use)
+const _iceWkRetRev   = [0, 8278, 1309, 2392, 0, 233, 1890, 1925, 0];
+const _iceWkRetUnits = [0, 117, 51, 204, 0, 7, 114, 33, 0];
+
+// Mayyan weekly (Feb weeks 6–9 only) — from maay_feb_full.xlsx
+// Price = ₪13.8 / individual unit (כמות בודדים)
+const _maayWkRev   = { 6: 271460, 7: 217902, 8: 481454, 9: 255107 };
+const _maayWkUnits = { 6: 19671,  7: 15790,  8: 34888,  9: 18486  };
+
+// ── WEEKLY CHART ─────────────────────────────────────────────────────────────
+let _weeklyMode = 'rev';
+
+// Returns which distributor view to show based on current filter state:
+//   'ice'  = Icedreams only  (blue)
+//   'maay' = מעיין only      (green, turbo data only — no danis at Mayyan)
+//   'both' = combined        (purple)
+//   'none' = no weekly data available (e.g. Mayyan + Danis filter)
+function _weeklyDistKey() {
+  if (S.cust !== 'all') {
+    const c = customers.find(x => x.id == S.cust);
+    if (!c) return 'none';
+    if (c.distributor === 'אייסדרים') return 'ice';
+    // Mayyan customer + danis brand → no data
+    if (c.distributor === 'מעיין נציגויות') return S.brand === 'danis' ? 'none' : 'maay';
+    return 'none';
+  }
+  if (S.dist === 'אייסדרים') return 'ice';
+  // Mayyan + danis → no data
+  if (S.dist === 'מעיין') return S.brand === 'danis' ? 'none' : 'maay';
+  if (S.dist === 'none')  return 'none';
+  // All distributors + danis → Icedreams only (Mayyan has no danis)
+  if (S.brand === 'danis') return 'ice';
+  return 'both';  // S.dist === 'all', brand = all or turbo
+}
+
+// Get the correct Icedreams data array for current brand filter
+function _iceDataArr(r) {
+  if (S.brand === 'turbo') return r ? _iceWkRevTurbo   : _iceWkUnitsTurbo;
+  if (S.brand === 'danis') return r ? _iceWkRevDanis   : _iceWkUnitsDanis;
+  return                          r ? _iceWkRev         : _iceWkUnits;
+}
+
+// Mayyan is turbo-only; return nulls if danis filter is active
+function _maayDataArr(r) {
+  if (S.brand === 'danis') return Array(9).fill(null);
+  return [null, null, null, null, null,
+    r ? _maayWkRev[6] : _maayWkUnits[6],
+    r ? _maayWkRev[7] : _maayWkUnits[7],
+    r ? _maayWkRev[8] : _maayWkUnits[8],
+    r ? _maayWkRev[9] : _maayWkUnits[9]];
+}
+
+function _mkWeeklyDatasets(mode) {
+  const r  = mode === 'rev';
+  const dk = _weeklyDistKey();
+  const iceData  = _iceDataArr(r);
+  const maayData = _maayDataArr(r);
+
+  if (dk === 'ice') {
+    return [{
+      label: 'Icedreams',
+      data: [...iceData],
+      borderColor: '#4f8ef7',
+      backgroundColor: 'rgba(79,142,247,0.1)',
+      borderWidth: 2.5, fill: true, tension: 0.3,
+      pointRadius: 4, pointHoverRadius: 7, spanGaps: false
+    }];
+  }
+
+  if (dk === 'maay') {
+    return [{
+      label: 'מעיין',
+      data: maayData,
+      borderColor: '#22c55e',
+      backgroundColor: 'rgba(34,197,94,0.08)',
+      borderWidth: 2.5, fill: true, tension: 0.3,
+      pointRadius: maayData.map(v => v !== null ? 4 : 0),
+      pointHoverRadius: 7, spanGaps: false
+    }];
+  }
+
+  if (dk === 'both') {
+    // W1-W5: ice only; W6-W9: ice + maay
+    const combined = iceData.map((v, i) => v + (maayData[i] ?? 0));
+    return [{
+      label: 'כל המפיצים',
+      data: combined,
+      borderColor: '#a78bfa',
+      backgroundColor: 'rgba(167,139,250,0.1)',
+      borderWidth: 2.5, fill: true, tension: 0.3,
+      pointRadius: 4, pointHoverRadius: 7, spanGaps: false
+    }];
+  }
+
+  return [];  // 'none'
+}
+
+function _updateWeeklyLegend(dk) {
+  const el = document.getElementById('wlegend');
+  if (!el) return;
+  const brandTag = S.brand === 'turbo' ? ' · Turbo only' : S.brand === 'danis' ? ' · Dani\'s only' : '';
+  if (dk === 'none') {
+    el.innerHTML = '<div class="wleg-item" style="color:var(--amber)">⚠ אין נתונים שבועיים עבור מסנן זה (מעיין אינו מפיץ Dani\'s)</div>';
+    return;
+  }
+  if (dk === 'both') {
+    el.innerHTML =
+      `<div class="wleg-item"><div class="wleg-line" style="background:#a78bfa"></div>כל המפיצים (28/12–22/2)${brandTag} — W1–W5: Icedreams · W6–W9: שני המפיצים</div>`;
+    return;
+  }
+  if (dk === 'ice') {
+    const suffix = S.brand === 'danis' ? ' · Dani\'s בלבד (מעיין אינו מפיץ Dani\'s)' : brandTag;
+    el.innerHTML =
+      `<div class="wleg-item"><div class="wleg-line" style="background:#4f8ef7"></div>Icedreams שבועי (28/12–22/2)${suffix}</div>`;
+    return;
+  }
+  if (dk === 'maay') {
+    el.innerHTML =
+      `<div class="wleg-item"><div class="wleg-line" style="background:#22c55e"></div>מעיין שבועי (1/2–22/2)${brandTag}</div>`;
+    return;
+  }
+}
+
+function renderWeeklyChart() {
+  const mode = _weeklyMode;
+  const dk   = _weeklyDistKey();
+  const ctx  = document.getElementById('c-weekly').getContext('2d');
+  if (charts.weekly) charts.weekly.destroy();
+
+  const isRev = mode === 'rev';
+  const fmtAx = v => isRev
+    ? (v >= 1000000 ? '₪'+(v/1000000).toFixed(1)+'M' : v >= 1000 ? '₪'+Math.round(v/1000)+'K' : '₪'+v)
+    : (v >= 1000 ? Math.round(v/1000)+'K' : String(v));
+  const fmtTip = v => isRev
+    ? '₪'+Math.round(v).toLocaleString()
+    : Math.round(v).toLocaleString()+' units';
+
+  const datasets = _mkWeeklyDatasets(mode);
+  _updateWeeklyLegend(dk);
+
+  charts.weekly = new Chart(ctx, {
+    type: 'line',
+    data: { labels: weeklyXLabels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        datalabels: false,
+        tooltip: {
+          callbacks: {
+            label: function(c) { return c.raw !== null ? c.dataset.label + ': ' + fmtTip(c.raw) : null; }
+          },
+          filter: function(item) { return item.raw !== null; }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#8892a4', font: { size: 11 } },
+          grid: { color: 'rgba(46,51,72,0.45)' }
+        },
+        y: {
+          beginAtZero: true,
+          max: 800000,
+          ticks: { color: '#8892a4', font: { size: 10 }, callback: fmtAx },
+          grid: { color: 'rgba(46,51,72,0.4)' }
+        }
+      }
+    },
+    plugins: [{
+      id: 'weeklyValueLabels',
+      afterDraw: function(chart) {
+        var c2 = chart.ctx;
+        chart.data.datasets.forEach(function(ds, di) {
+          var meta = chart.getDatasetMeta(di);
+          if (!meta || meta.hidden) return;
+          meta.data.forEach(function(el, idx) {
+            var val = ds.data[idx];
+            if (val === null || val === undefined) return;
+            var lbl = fmtTip(val);
+            var tw = c2.measureText(lbl).width + 6;
+            var th = 13;
+            var lx = el.x;
+            var ly = el.y - 10;
+            c2.save();
+            c2.font = '600 10px sans-serif';
+            c2.textAlign = 'center';
+            c2.textBaseline = 'bottom';
+            /* dark pill background */
+            c2.fillStyle = 'rgba(18,22,38,0.78)';
+            var rx = lx - tw/2, ry = ly - th;
+            c2.beginPath();
+            c2.roundRect(rx, ry, tw, th, 3);
+            c2.fill();
+            /* label in dataset color */
+            c2.fillStyle = ds.borderColor || '#e2e8f0';
+            c2.fillText(lbl, lx, ly);
+            c2.restore();
+          });
+        });
+      }
+    }]
+  });
+}
+
+function setWeeklyMode(mode) {
+  _weeklyMode = mode;
+  document.getElementById('wb-rev').classList.toggle('on', mode === 'rev');
+  document.getElementById('wb-u').classList.toggle('on', mode !== 'rev');
+  renderWeeklyChart();
+}
+
+</script>
+</body>
+</html>
